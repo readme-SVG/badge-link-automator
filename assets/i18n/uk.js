@@ -1,0 +1,25 @@
+const uk = {
+    languageLabel: 'Мова',
+    topLabel: 'Інструмент',
+    title: 'GitHub Badge Linker',
+    subtitle: 'Перетворює сирі теги зображень badge на фрагменти з посиланнями на репозиторії за один крок.',
+    contextLabel: 'Контекст',
+    quote: 'Типографіка це інтерфейс. Структура це стиль.',
+    supportCopy: 'Введіть профіль, вставте теги badge та експортуйте готовий для production код README за секунди.',
+    githubLabel: 'Посилання на профіль GitHub',
+    githubPlaceholder: 'https://github.com/username',
+    badgesLabel: 'Вставте badge HTML (<img> теги)',
+    badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
+    generateButton: 'Згенерувати код',
+    resultLabel: 'Згенерований код для README.md',
+    statusProcessing: 'Обробка...',
+    statusFetching: 'Отримання даних користувача {username}...',
+    statusDone: 'Готово. Код успішно згенеровано.',
+    errorInvalidUrl: 'Помилка: Невірний формат посилання на профіль GitHub.',
+    errorNoImg: 'Помилка: Теги <img> не знайдено.',
+    errorNoRepos: 'У цього користувача немає публічних репозиторіїв.',
+    errorApi: 'Помилка API: {status} {statusText}',
+    errorGeneric: 'Помилка: {message}'
+};
+
+export default uk;

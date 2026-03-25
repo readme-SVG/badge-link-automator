@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE, LOCALE_OPTIONS, getLocaleDictionary, isSupportedLocale } from '../i18n/index.js';
+
 const STORAGE_KEYS = {
     language: 'badge_linker_language',
     form: 'badge_linker_form_cache',
@@ -6,71 +8,29 @@ const STORAGE_KEYS = {
 
 const REPO_CACHE_TTL_MS = 15 * 60 * 1000;
 
-const TRANSLATIONS = {
-    en: {
-        languageLabel: 'Language',
-        topLabel: 'Utility',
-        title: 'GitHub Badge Linker',
-        subtitle: 'Convert raw badge image tags into repository-linked snippets with one pass.',
-        contextLabel: 'Context',
-        quote: 'Type is the interface. Structure is the style.',
-        supportCopy: 'Enter your profile, paste badge tags, and export production-ready README markup in seconds.',
-        githubLabel: 'GitHub profile URL',
-        githubPlaceholder: 'https://github.com/username',
-        badgesLabel: 'Paste badge HTML (<img> tags)',
-        badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
-        generateButton: 'Generate code',
-        resultLabel: 'Generated code for README.md',
-        statusProcessing: 'Processing...',
-        statusFetching: 'Fetching data for user {username}...',
-        statusDone: 'Done! Code generated successfully.',
-        errorInvalidUrl: 'Error: Invalid GitHub profile URL format.',
-        errorNoImg: 'Error: No <img> tags found.',
-        errorNoRepos: 'This user has no public repositories.',
-        errorApi: 'API error: {status} {statusText}',
-        errorGeneric: 'Error: {message}'
-    },
-    ru: {
-        languageLabel: 'Язык',
-        topLabel: 'Инструмент',
-        title: 'GitHub Badge Linker',
-        subtitle: 'Преобразует теги badge image в ссылки на репозитории за один проход.',
-        contextLabel: 'Контекст',
-        quote: 'Типографика это интерфейс. Структура это стиль.',
-        supportCopy: 'Введите профиль, вставьте badge теги и получите готовый README код за секунды.',
-        githubLabel: 'Ссылка на профиль GitHub',
-        githubPlaceholder: 'https://github.com/username',
-        badgesLabel: 'Вставьте badge HTML (<img> теги)',
-        badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
-        generateButton: 'Сгенерировать код',
-        resultLabel: 'Готовый код для README.md',
-        statusProcessing: 'Обработка...',
-        statusFetching: 'Получение данных пользователя {username}...',
-        statusDone: 'Готово! Код успешно сгенерирован.',
-        errorInvalidUrl: 'Ошибка: Неверный формат ссылки на профиль GitHub.',
-        errorNoImg: 'Ошибка: Не найдено тегов <img>.',
-        errorNoRepos: 'У пользователя нет публичных репозиториев.',
-        errorApi: 'Ошибка API: {status} {statusText}',
-        errorGeneric: 'Ошибка: {message}'
-    }
-};
-
 function getCurrentLanguage() {
     const saved = localStorage.getItem(STORAGE_KEYS.language);
-    if (saved && TRANSLATIONS[saved]) {
+    if (saved && isSupportedLocale(saved)) {
         return saved;
     }
-    return 'en';
+    return DEFAULT_LOCALE;
 }
 
 function t(key, variables = {}) {
-    const lang = getCurrentLanguage();
-    const dictionary = TRANSLATIONS[lang] || TRANSLATIONS.en;
-    const template = dictionary[key] || TRANSLATIONS.en[key] || key;
+    const dictionary = getLocaleDictionary(getCurrentLanguage());
+    const fallbackDictionary = getLocaleDictionary(DEFAULT_LOCALE);
+    const template = dictionary[key] || fallbackDictionary[key] || key;
     return Object.keys(variables).reduce(
         (acc, variableName) => acc.replaceAll(`{${variableName}}`, String(variables[variableName])),
         template
     );
+}
+
+function renderLocaleOptions() {
+    const languageSelect = document.getElementById('languageSelect');
+    languageSelect.innerHTML = LOCALE_OPTIONS.map(
+        (locale) => `<option value="${locale.code}">${locale.label}</option>`
+    ).join('');
 }
 
 function applyLanguage() {
@@ -275,6 +235,7 @@ function initializeApp() {
     const githubInput = document.getElementById('githubUrl');
     const badgesInput = document.getElementById('badgesInput');
 
+    renderLocaleOptions();
     loadFormCache();
     applyLanguage();
 

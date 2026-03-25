@@ -7,27 +7,81 @@
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-    <h1>GitHub Badge Linker</h1>
+    <svg class="svg-defs" aria-hidden="true" focusable="false">
+        <defs>
+            <filter id="sketchy" x="-10%" y="-10%" width="120%" height="120%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="2" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
 
-    <div class="container">
-        <div>
-            <label for="githubUrl">GitHub profile URL:</label>
-            <input type="text" id="githubUrl" placeholder="https://github.com/username">
-        </div>
+    <div class="paper-texture" aria-hidden="true"></div>
 
-        <div>
-            <label for="badgesInput">Paste badges (HTML <img> tags):</label>
-            <textarea id="badgesInput" rows="8" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
-        </div>
+    <main class="app-shell">
+        <header class="app-header card card-tilt-left">
+            <div class="heading-wrap">
+                <svg class="heading-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 19.5c4.5-1.8 11.5-1.8 16 0" />
+                    <path d="M6 16.2V6.5a2.2 2.2 0 0 1 2.2-2.2H18" />
+                    <path d="M10 8h6" />
+                    <path d="M10 11h5" />
+                    <path d="M10 14h4" />
+                    <path d="M6 16.2c0 1.8-1.1 2.8-2.5 3.3" />
+                </svg>
+                <h1>GitHub Badge Linker</h1>
+            </div>
+            <p class="subtitle">Sketch-mode utility for mapping tech badges to your repositories.</p>
+        </header>
 
-        <button onclick="generateLinks()">Generate code</button>
-        <div id="statusMessage" class="status"></div>
+        <section class="container">
+            <div class="field-card card card-tilt-right">
+                <label for="githubUrl" class="field-label">
+                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 18l6-6-6-6" />
+                        <path d="M5 12h10" />
+                        <path d="M15 6h4v12h-4" />
+                    </svg>
+                    GitHub profile URL
+                </label>
+                <input type="text" id="githubUrl" placeholder="https://github.com/username">
+            </div>
 
-        <div>
-            <label for="resultOutput">Generated code for README.md:</label>
-            <textarea id="resultOutput" rows="12" readonly></textarea>
-        </div>
-    </div>
+            <div class="field-card card card-tilt-left">
+                <label for="badgesInput" class="field-label">
+                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="4" y="5" width="16" height="14" rx="2" />
+                        <path d="M8 9h8" />
+                        <path d="M8 12h8" />
+                        <path d="M8 15h5" />
+                    </svg>
+                    Paste badge HTML (<code>&lt;img&gt;</code> tags)
+                </label>
+                <textarea id="badgesInput" rows="8" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
+            </div>
+
+            <button class="generate-btn card-tilt-right" onclick="generateLinks()">
+                <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h14" />
+                    <path d="M13 6l6 6-6 6" />
+                </svg>
+                Generate code
+            </button>
+
+            <div id="statusMessage" class="status"></div>
+
+            <div class="field-card card card-tilt-right">
+                <label for="resultOutput" class="field-label">
+                    <svg class="label-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M7 7h10v10H7z" />
+                        <path d="M10 10h8v8h-8z" />
+                    </svg>
+                    Generated code for <code>README.md</code>
+                </label>
+                <textarea id="resultOutput" rows="12" readonly></textarea>
+            </div>
+        </section>
+    </main>
 
     <script src="assets/js/app.js"></script>
 </body>

@@ -1,66 +1,224 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Kalam:wght@400;700&family=Permanent+Marker&display=swap');
+
+:root {
+    --bg: #141414;
+    --bg-soft: #1a1a1a;
+    --chalk: #f0ece0;
+    --orange: #f4845f;
+    --teal: #5bbfad;
+    --muted: #c9c2b5;
+    --error: #ff8d8d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background-color: #0d1117;
-    color: #c9d1d9;
-    max-width: 800px;
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    position: relative;
+    overflow-x: hidden;
+    background: radial-gradient(circle at 10% 10%, #222 0%, var(--bg) 45%, #101010 100%);
+    color: var(--chalk);
+    font-family: 'Kalam', 'Caveat', system-ui, sans-serif;
+    padding: 2rem 1.2rem;
+}
+
+.paper-texture {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03) 0, transparent 38%), radial-gradient(circle at 80% 0, rgba(91, 191, 173, 0.06) 0, transparent 32%), radial-gradient(circle at 40% 80%, rgba(244, 132, 95, 0.07) 0, transparent 30%);
+    opacity: 0.7;
+    z-index: 0;
+}
+
+.svg-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.app-shell {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 20px;
+    display: grid;
+    gap: 1rem;
+}
+
+.app-header {
+    text-align: center;
+    padding: 1.25rem 1.25rem 1rem;
+}
+
+.heading-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.65rem;
 }
 
 h1 {
-    color: #58a6ff;
-    text-align: center;
+    margin: 0;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-family: 'Permanent Marker', 'Kalam', sans-serif;
+    letter-spacing: 1.1px;
+    color: var(--chalk);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.subtitle {
+    margin: 0.4rem 0 0;
+    color: var(--muted);
+    font-size: 1.12rem;
+}
+
+.heading-icon {
+    width: 38px;
+    height: 38px;
+    color: var(--orange);
+    filter: url(#sketchy);
 }
 
 .container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    display: grid;
+    gap: 0.9rem;
 }
 
-label {
-    font-weight: bold;
-    margin-bottom: 5px;
+.card {
+    background: linear-gradient(165deg, rgba(28, 28, 28, 0.94) 0%, rgba(19, 19, 19, 0.98) 100%);
+    border: 2px dashed rgba(240, 236, 224, 0.6);
+    border-radius: 14px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(240, 236, 224, 0.08);
+    filter: url(#sketchy);
+}
+
+.field-card {
+    padding: 0.95rem;
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.45rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.label-icon,
+.button-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--teal);
+    flex-shrink: 0;
+    filter: url(#sketchy);
 }
 
 input,
 textarea {
     width: 100%;
-    padding: 10px;
-    background-color: #161b22;
-    border: 1px solid #30363d;
-    color: #c9d1d9;
-    border-radius: 6px;
-    box-sizing: border-box;
-    font-family: monospace;
+    border: 2px dashed rgba(240, 236, 224, 0.52);
+    border-radius: 10px;
+    background: var(--bg-soft);
+    color: var(--chalk);
+    padding: 0.7rem 0.85rem;
+    font: 600 1rem 'Caveat', 'Kalam', monospace;
+    line-height: 1.45;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    filter: url(#sketchy);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #a99f90;
+}
+
+input:focus,
+textarea:focus {
+    border-color: rgba(91, 191, 173, 0.95);
+    box-shadow: 0 0 0 3px rgba(91, 191, 173, 0.2);
 }
 
 textarea {
     resize: vertical;
+    min-height: 160px;
 }
 
-button {
-    background-color: #238636;
-    color: #ffffff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border-radius: 6px;
+.generate-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    border: 2px dashed rgba(240, 236, 224, 0.68);
+    background: linear-gradient(170deg, #f4845f 0%, #db6e4f 100%);
+    color: #fdf7ef;
+    padding: 0.75rem 1.2rem;
+    border-radius: 12px;
+    font: 700 1.1rem 'Permanent Marker', 'Kalam', sans-serif;
+    letter-spacing: 0.4px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    filter: url(#sketchy);
 }
 
-button:hover {
-    background-color: #2ea043;
+.generate-btn:hover {
+    transform: translateY(-1px) rotate(-0.4deg);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.generate-btn:active {
+    transform: translateY(1px) rotate(0.2deg);
 }
 
 .status {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #8b949e;
+    min-height: 28px;
+    padding: 0.4rem 0.75rem;
+    color: var(--muted);
+    font-size: 1.06rem;
+    font-weight: 700;
+    border-left: 3px dashed rgba(91, 191, 173, 0.65);
 }
 
 .error {
-    color: #ff7b72;
+    color: var(--error);
+    border-left-color: rgba(244, 132, 95, 0.8);
+}
+
+code {
+    font-family: 'Caveat', 'Kalam', monospace;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 0 0.35rem;
+}
+
+.card-tilt-left {
+    transform: rotate(-0.6deg);
+}
+
+.card-tilt-right {
+    transform: rotate(0.6deg);
+}
+
+@media (max-width: 760px) {
+    body {
+        padding: 1rem 0.8rem 1.5rem;
+    }
+
+    .card-tilt-left,
+    .card-tilt-right {
+        transform: rotate(0deg);
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
 }

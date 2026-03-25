@@ -1,3 +1,41 @@
+/**
+ * @typedef {Object} GitHubRepository
+ * @property {string} html_url - Canonical GitHub URL of the repository.
+ * @property {string|null} language - Primary repository language reported by GitHub.
+ * @property {string|null} description - Repository description text.
+ * @property {string} name - Repository name.
+ * @property {string[]|undefined} topics - Repository topic list when available.
+ * @property {string|null} homepage - Optional repository homepage URL.
+ */
+
+/**
+ * Generates README-ready linked badge HTML by matching pasted badge tags to a user's repositories.
+ *
+ * This function reads user input from the DOM, validates the GitHub profile URL, fetches up to 100
+ * public repositories for the detected username, extracts `<img>` badge tags from the input payload,
+ * and attempts to map each badge to a relevant repository using language, description, name,
+ * topics, or homepage heuristics. If a deterministic match is not found for a badge, the function
+ * falls back to a random repository URL from the fetched result set.
+ *
+ * Args:
+ *   None: This function does not accept direct arguments. It consumes values from DOM elements with
+ *     IDs `githubUrl`, `badgesInput`, `resultOutput`, and `statusMessage`.
+ *
+ * Returns:
+ *   Promise<void>: Resolves when processing and UI updates complete.
+ *
+ * Raises:
+ *   Error: Throws internally for GitHub API failures and no-repository cases; all thrown errors are
+ *     handled in the local `catch` block and surfaced to the user through `#statusMessage`.
+ *
+ * @example
+ * // Triggered by the page button click handler.
+ * generateLinks();
+ * // Expected effect:
+ * // - Reads the profile URL and badge HTML from form fields.
+ * // - Writes linked badge anchors into #resultOutput.
+ * // - Displays success or error status in #statusMessage.
+ */
 async function generateLinks() {
     const githubUrl = document.getElementById('githubUrl').value.trim();
     const badgesInput = document.getElementById('badgesInput').value.trim();
@@ -24,6 +62,7 @@ async function generateLinks() {
             throw new Error(`API error: ${response.status} ${response.statusText}`);
         }
 
+        /** @type {GitHubRepository[]} */
         const repos = await response.json();
 
         if (repos.length === 0) {

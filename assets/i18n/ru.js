@@ -18,6 +18,9 @@ const ru = {
     errorInvalidUrl: 'Ошибка: Неверный формат ссылки на профиль GitHub.',
     errorNoImg: 'Ошибка: Не найдено тегов <img>.',
     errorNoRepos: 'У пользователя нет публичных репозиториев.',
+    copyButton: 'Скопировать код',
+    copySuccess: 'Код скопирован в буфер обмена.',
+    copyError: 'Не удалось скопировать код.',
     errorApi: 'Ошибка API: {status} {statusText}',
     errorGeneric: 'Ошибка: {message}'
 };

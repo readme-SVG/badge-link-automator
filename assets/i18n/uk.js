@@ -18,6 +18,9 @@ const uk = {
     errorInvalidUrl: 'Помилка: Невірний формат посилання на профіль GitHub.',
     errorNoImg: 'Помилка: Теги <img> не знайдено.',
     errorNoRepos: 'У цього користувача немає публічних репозиторіїв.',
+    copyButton: 'Скопіювати код',
+    copySuccess: 'Код скопійовано в буфер обміну.',
+    copyError: 'Не вдалося скопіювати код.',
     errorApi: 'Помилка API: {status} {statusText}',
     errorGeneric: 'Помилка: {message}'
 };

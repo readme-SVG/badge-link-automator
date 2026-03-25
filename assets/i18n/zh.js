@@ -18,6 +18,9 @@ const zh = {
     errorInvalidUrl: '错误：GitHub 主页链接格式无效。',
     errorNoImg: '错误：未找到 <img> 标签。',
     errorNoRepos: '该用户没有公开仓库。',
+    copyButton: '复制代码',
+    copySuccess: '代码已复制到剪贴板。',
+    copyError: '无法复制代码。',
     errorApi: 'API 错误：{status} {statusText}',
     errorGeneric: '错误：{message}'
 };

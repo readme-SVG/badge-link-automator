@@ -18,6 +18,9 @@ const nl = {
     errorInvalidUrl: 'Fout: Ongeldig formaat voor GitHub-profiel-URL.',
     errorNoImg: 'Fout: Geen <img>-tags gevonden.',
     errorNoRepos: 'Deze gebruiker heeft geen openbare repositories.',
+    copyButton: 'Code kopiëren',
+    copySuccess: 'Code gekopieerd naar klembord.',
+    copyError: 'Code kon niet worden gekopieerd.',
     errorApi: 'API-fout: {status} {statusText}',
     errorGeneric: 'Fout: {message}'
 };

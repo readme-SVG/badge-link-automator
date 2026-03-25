@@ -18,6 +18,9 @@ const de = {
     errorInvalidUrl: 'Fehler: Ungültiges Format der GitHub-Profil-URL.',
     errorNoImg: 'Fehler: Keine <img>-Tags gefunden.',
     errorNoRepos: 'Dieser Benutzer hat keine öffentlichen Repositories.',
+    copyButton: 'Code kopieren',
+    copySuccess: 'Code in die Zwischenablage kopiert.',
+    copyError: 'Code konnte nicht kopiert werden.',
     errorApi: 'API-Fehler: {status} {statusText}',
     errorGeneric: 'Fehler: {message}'
 };

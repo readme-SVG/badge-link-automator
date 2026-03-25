@@ -18,6 +18,9 @@ const cs = {
     errorInvalidUrl: 'Chyba: Neplatný formát URL profilu GitHub.',
     errorNoImg: 'Chyba: Nebyly nalezeny tagy <img>.',
     errorNoRepos: 'Tento uživatel nemá veřejné repozitáře.',
+    copyButton: 'Kopírovat kód',
+    copySuccess: 'Kód byl zkopírován do schránky.',
+    copyError: 'Kód se nepodařilo zkopírovat.',
     errorApi: 'Chyba API: {status} {statusText}',
     errorGeneric: 'Chyba: {message}'
 };

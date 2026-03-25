@@ -18,6 +18,9 @@ const sv = {
     errorInvalidUrl: 'Fel: Ogiltigt format för GitHub-profil-URL.',
     errorNoImg: 'Fel: Inga <img>-taggar hittades.',
     errorNoRepos: 'Den här användaren har inga publika repositories.',
+    copyButton: 'Kopiera kod',
+    copySuccess: 'Koden kopierades till urklipp.',
+    copyError: 'Kunde inte kopiera koden.',
     errorApi: 'API-fel: {status} {statusText}',
     errorGeneric: 'Fel: {message}'
 };

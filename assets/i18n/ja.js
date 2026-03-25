@@ -18,6 +18,9 @@ const ja = {
     errorInvalidUrl: 'エラー: GitHub プロフィール URL の形式が正しくありません。',
     errorNoImg: 'エラー: <img> タグが見つかりません。',
     errorNoRepos: 'このユーザーには公開リポジトリがありません。',
+    copyButton: 'コードをコピー',
+    copySuccess: 'コードをクリップボードにコピーしました。',
+    copyError: 'コードをコピーできませんでした。',
     errorApi: 'API エラー: {status} {statusText}',
     errorGeneric: 'エラー: {message}'
 };

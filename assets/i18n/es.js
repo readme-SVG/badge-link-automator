@@ -18,6 +18,9 @@ const es = {
     errorInvalidUrl: 'Error: Formato inválido de URL de perfil de GitHub.',
     errorNoImg: 'Error: No se encontraron etiquetas <img>.',
     errorNoRepos: 'Este usuario no tiene repositorios públicos.',
+    copyButton: 'Copiar código',
+    copySuccess: 'Código copiado al portapapeles.',
+    copyError: 'No se pudo copiar el código.',
     errorApi: 'Error de API: {status} {statusText}',
     errorGeneric: 'Error: {message}'
 };

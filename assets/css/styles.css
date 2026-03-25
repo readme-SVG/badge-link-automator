@@ -91,35 +91,33 @@ body::after {
     padding: 2.2rem 0 4.6rem;
 }
 
-.masthead {
-    position: relative;
+.split-layout {
     display: grid;
-    gap: 0.8rem;
-    padding: 1.2rem 0 2rem;
-    border-bottom: 1px dashed rgba(232, 224, 208, 0.15);
+    grid-template-columns: minmax(260px, 0.95fr) minmax(0, 1.65fr);
+    gap: clamp(1.6rem, 3vw, 3.2rem);
+    align-items: start;
 }
 
-.masthead::before {
-    content: '❧';
-    position: absolute;
-    bottom: -1.03rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(232, 224, 208, 0.55);
-    background: linear-gradient(180deg, var(--paper-dark) 0%, var(--paper-dark-soft) 100%);
-    padding: 0 0.55rem;
-    font-size: 1rem;
+.brand-column,
+.workspace-column {
+    background: rgba(14, 11, 11, 0.58);
+    border: 1px dashed rgba(232, 224, 208, 0.15);
 }
 
-.masthead::after {
+.brand-column {
+    position: sticky;
+    top: 1rem;
+    display: grid;
+    gap: 0.85rem;
+    padding: 1.3rem 1.1rem;
+}
+
+.brand-column::after {
     content: '';
-    position: absolute;
-    top: 0.35rem;
-    right: 0.9rem;
-    width: 82px;
-    height: 56px;
-    opacity: 0.13;
-    pointer-events: none;
+    width: 90px;
+    height: 58px;
+    opacity: 0.14;
+    justify-self: end;
     background:
         radial-gradient(circle at 12% 42%, var(--ink-red) 0 8px, transparent 9px),
         radial-gradient(circle at 45% 18%, var(--ink-red) 0 4px, transparent 5px),
@@ -140,7 +138,7 @@ h1 {
     margin: 0;
     max-width: 10.8ch;
     font-family: 'Libre Baskerville', 'Playfair Display', Georgia, serif;
-    font-size: clamp(3.4rem, 8.8vw, 6.2rem);
+    font-size: clamp(3.3rem, 8.4vw, 5.8rem);
     line-height: 0.96;
     letter-spacing: 0.01em;
     color: var(--ink-cream);
@@ -148,52 +146,13 @@ h1 {
 
 .dek {
     margin: 0;
-    max-width: 64ch;
+    max-width: 32ch;
     color: rgba(232, 224, 208, 0.78);
     font-size: clamp(1rem, 1.34vw, 1.2rem);
 }
 
-.editorial-grid {
-    display: grid;
-    grid-template-columns: minmax(250px, 0.95fr) minmax(0, 1.65fr);
-    gap: clamp(1.5rem, 2.8vw, 3.1rem);
-    align-items: start;
-    padding-top: 2rem;
-}
-
-.lead-column {
-    position: sticky;
-    top: 1rem;
-    display: grid;
-    gap: 1.2rem;
-    padding: 1rem;
-    background: rgba(14, 11, 11, 0.58);
-    border: 1px dashed rgba(232, 224, 208, 0.15);
-}
-
-.pull-quote {
-    margin: 0;
-    padding: 0.25rem 0 0.15rem 1rem;
-    border-left: 3px solid rgba(232, 224, 208, 0.42);
-    color: rgba(232, 224, 208, 0.76);
-    font-family: 'Lora', 'PT Serif', Georgia, serif;
-    font-style: italic;
-    font-size: clamp(1.45rem, 3.1vw, 2.4rem);
-    line-height: 1.35;
-}
-
-.support-copy {
-    margin: 0;
-    color: rgba(232, 224, 208, 0.72);
-    font-size: 1rem;
-}
-
-.form-column {
-    display: grid;
-    gap: 1rem;
+.workspace-column {
     padding: 1.05rem;
-    background: rgba(14, 11, 11, 0.58);
-    border: 1px dashed rgba(232, 224, 208, 0.15);
 }
 
 .field-block {
@@ -245,8 +204,14 @@ textarea {
     min-height: 180px;
 }
 
-.generate-btn {
-    justify-self: start;
+.action-row {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.generate-btn,
+.copy-btn {
     border: 1px solid #2b1616;
     background: #1a0f0f;
     color: var(--ink-cream);
@@ -259,15 +224,26 @@ textarea {
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.generate-btn:hover {
+.generate-btn:hover,
+.copy-btn:hover {
     background: #281414;
     color: #efe8db;
+}
+
+.copy-btn {
+    background: #14181e;
+    border-color: rgba(26, 58, 92, 0.7);
+}
+
+.copy-btn:hover {
+    background: #1a2532;
 }
 
 .status {
     min-height: 1.65rem;
     color: rgba(232, 224, 208, 0.7);
     font-size: 0.95rem;
+    margin-top: 0.7rem;
 }
 
 .error {
@@ -297,11 +273,11 @@ img {
 }
 
 @media (max-width: 980px) {
-    .editorial-grid {
+    .split-layout {
         grid-template-columns: 1fr;
     }
 
-    .lead-column {
+    .brand-column {
         position: static;
     }
 }
@@ -319,7 +295,7 @@ img {
     }
 
     h1 {
-        font-size: clamp(3rem, 13vw, 4.8rem);
+        font-size: clamp(2.7rem, 12.5vw, 4.4rem);
     }
 
     .section-label,

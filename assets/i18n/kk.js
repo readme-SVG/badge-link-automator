@@ -18,6 +18,9 @@ const kk = {
     errorInvalidUrl: 'Қате: GitHub профиль сілтемесінің пішімі дұрыс емес.',
     errorNoImg: 'Қате: <img> тегтері табылмады.',
     errorNoRepos: 'Бұл пайдаланушыда ашық репозиторий жоқ.',
+    copyButton: 'Кодты көшіру',
+    copySuccess: 'Код алмасу буферіне көшірілді.',
+    copyError: 'Кодты көшіру мүмкін болмады.',
     errorApi: 'API қатесі: {status} {statusText}',
     errorGeneric: 'Қате: {message}'
 };

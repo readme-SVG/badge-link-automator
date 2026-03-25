@@ -18,6 +18,9 @@ const fr = {
     errorInvalidUrl: 'Erreur : format d’URL de profil GitHub invalide.',
     errorNoImg: 'Erreur : aucune balise <img> trouvée.',
     errorNoRepos: 'Cet utilisateur n’a aucun dépôt public.',
+    copyButton: 'Copier le code',
+    copySuccess: 'Code copié dans le presse-papiers.',
+    copyError: 'Impossible de copier le code.',
     errorApi: 'Erreur API : {status} {statusText}',
     errorGeneric: 'Erreur : {message}'
 };

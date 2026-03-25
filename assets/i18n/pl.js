@@ -18,6 +18,9 @@ const pl = {
     errorInvalidUrl: 'Błąd: Nieprawidłowy format URL profilu GitHub.',
     errorNoImg: 'Błąd: Nie znaleziono tagów <img>.',
     errorNoRepos: 'Ten użytkownik nie ma publicznych repozytoriów.',
+    copyButton: 'Kopiuj kod',
+    copySuccess: 'Kod skopiowano do schowka.',
+    copyError: 'Nie udało się skopiować kodu.',
     errorApi: 'Błąd API: {status} {statusText}',
     errorGeneric: 'Błąd: {message}'
 };

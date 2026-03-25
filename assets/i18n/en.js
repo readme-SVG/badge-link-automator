@@ -18,6 +18,9 @@ const en = {
     errorInvalidUrl: 'Error: Invalid GitHub profile URL format.',
     errorNoImg: 'Error: No <img> tags found.',
     errorNoRepos: 'This user has no public repositories.',
+    copyButton: 'Copy code',
+    copySuccess: 'Code copied to clipboard.',
+    copyError: 'Could not copy code.',
     errorApi: 'API error: {status} {statusText}',
     errorGeneric: 'Error: {message}'
 };

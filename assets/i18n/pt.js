@@ -18,6 +18,9 @@ const pt = {
     errorInvalidUrl: 'Erro: Formato de URL de perfil do GitHub inválido.',
     errorNoImg: 'Erro: Nenhuma tag <img> encontrada.',
     errorNoRepos: 'Este usuário não possui repositórios públicos.',
+    copyButton: 'Copiar código',
+    copySuccess: 'Código copiado para a área de transferência.',
+    copyError: 'Não foi possível copiar o código.',
     errorApi: 'Erro de API: {status} {statusText}',
     errorGeneric: 'Erro: {message}'
 };

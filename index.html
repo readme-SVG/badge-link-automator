@@ -9,27 +9,18 @@
 <body>
     <div class="language-panel" aria-label="Language selector">
         <label for="languageSelect" class="language-label" data-i18n="languageLabel">Language</label>
-        <select id="languageSelect" class="language-select">
-            <option value="en">English</option>
-            <option value="ru">Русский</option>
-        </select>
+        <select id="languageSelect" class="language-select"></select>
     </div>
 
     <main class="editorial-shell">
-        <header class="masthead">
-            <p class="section-label" data-i18n="topLabel">Utility</p>
-            <h1 data-i18n="title">GitHub Badge Linker</h1>
-            <p class="dek" data-i18n="subtitle">Convert raw badge image tags into repository-linked snippets with one pass.</p>
-        </header>
-
-        <section class="editorial-grid" aria-label="Badge linker form">
-            <aside class="lead-column">
-                <p class="section-label" data-i18n="contextLabel">Context</p>
-                <blockquote class="pull-quote" data-i18n="quote">Type is the interface. Structure is the style.</blockquote>
-                <p class="support-copy" data-i18n="supportCopy">Enter your profile, paste badge tags, and export production-ready README markup in seconds.</p>
+        <section class="split-layout" aria-label="Badge linker workspace">
+            <aside class="brand-column">
+                <p class="section-label" data-i18n="topLabel">Utility</p>
+                <h1 data-i18n="title">GitHub Badge Linker</h1>
+                <p class="dek" data-i18n="subtitle">Convert raw badge image tags into repository-linked snippets with one pass.</p>
             </aside>
 
-            <section class="form-column">
+            <section class="workspace-column">
                 <div class="field-block">
                     <label for="githubUrl" class="field-label" data-i18n="githubLabel">GitHub profile URL</label>
                     <input type="text" id="githubUrl" data-i18n-placeholder="githubPlaceholder" placeholder="https://github.com/username">
@@ -40,7 +31,11 @@
                     <textarea id="badgesInput" rows="8" data-i18n-placeholder="badgesPlaceholder" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
                 </div>
 
-                <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
+                <div class="action-row">
+                    <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
+                    <button class="copy-btn" onclick="copyResultCode()" data-i18n="copyButton">Copy code</button>
+                </div>
+
                 <div id="statusMessage" class="status"></div>
 
                 <div class="field-block output-block">

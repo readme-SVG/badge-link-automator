@@ -1,0 +1,240 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Serif:wght@400;500;600&family=Syne:wght@700;800&display=swap');
+
+:root {
+    --bg: #0c0c0c;
+    --ink: #111318;
+    --white: #ffffff;
+    --gray: #aaaaaa;
+    --accent: #ff2d2d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    background: linear-gradient(180deg, var(--bg) 0%, var(--ink) 100%);
+    color: var(--white);
+    font-family: 'IBM Plex Serif', Georgia, serif;
+    line-height: 1.6;
+}
+
+.language-panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    gap: 0.35rem;
+    z-index: 10;
+    background: rgba(12, 12, 12, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.55rem 0.65rem;
+    min-width: 150px;
+}
+
+.language-label {
+    margin: 0;
+    font: 700 0.65rem/1 'Syne', 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18rem;
+    color: var(--gray);
+}
+
+.language-select {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: var(--white);
+    padding: 0.35rem 0.4rem;
+    font: 500 0.95rem 'IBM Plex Serif', Georgia, serif;
+}
+
+.editorial-shell {
+    width: min(1200px, 94vw);
+    margin: 0 auto;
+    padding: 2rem 0 4rem;
+}
+
+.masthead {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem 0 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.section-label {
+    margin: 0;
+    font: 700 0.78rem/1 'Syne', 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.28rem;
+    color: var(--gray);
+}
+
+h1 {
+    margin: 0;
+    font-family: 'Syne', 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 12vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    max-width: 11ch;
+}
+
+.dek {
+    margin: 0;
+    max-width: 62ch;
+    font-size: clamp(1.05rem, 1.4vw, 1.35rem);
+    color: var(--gray);
+}
+
+.editorial-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.7fr);
+    gap: clamp(1.5rem, 3vw, 3.5rem);
+    align-items: start;
+    padding-top: 2rem;
+}
+
+.lead-column {
+    position: sticky;
+    top: 1.2rem;
+    display: grid;
+    gap: 1.3rem;
+}
+
+.pull-quote {
+    margin: 0;
+    font-family: 'Syne', 'Bebas Neue', sans-serif;
+    font-size: clamp(1.9rem, 3.4vw, 3rem);
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    color: var(--white);
+}
+
+.support-copy {
+    margin: 0;
+    color: var(--gray);
+    font-size: 1rem;
+}
+
+.form-column {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.field-block {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.field-label {
+    font-family: 'Syne', 'Bebas Neue', sans-serif;
+    font-size: 0.92rem;
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    color: var(--gray);
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--white);
+    padding: 0.78rem 0.9rem;
+    border-radius: 0;
+    outline: none;
+    font: 500 1rem 'IBM Plex Serif', Georgia, serif;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(170, 170, 170, 0.85);
+}
+
+input:focus,
+textarea:focus,
+.language-select:focus {
+    border-color: var(--accent);
+    background: rgba(255, 45, 45, 0.04);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 180px;
+}
+
+.generate-btn {
+    justify-self: start;
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--white);
+    padding: 0.75rem 1.25rem;
+    font: 800 0.94rem/1 'Syne', 'Bebas Neue', sans-serif;
+    letter-spacing: 0.18rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.generate-btn:hover {
+    background: var(--accent);
+    color: #0a0a0a;
+}
+
+.status {
+    min-height: 1.6rem;
+    font-size: 0.96rem;
+    color: var(--gray);
+}
+
+.error {
+    color: var(--accent);
+}
+
+.output-block {
+    margin-top: 0.3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    padding-bottom: 1.25rem;
+}
+
+@media (max-width: 980px) {
+    .editorial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lead-column {
+        position: static;
+    }
+}
+
+@media (max-width: 680px) {
+    .editorial-shell {
+        width: min(1100px, 92vw);
+        padding-top: 1.2rem;
+    }
+
+    .language-panel {
+        top: 0.6rem;
+        right: 0.6rem;
+        min-width: 130px;
+    }
+
+    h1 {
+        font-size: clamp(3.8rem, 16vw, 5.2rem);
+    }
+
+    .section-label,
+    .field-label {
+        letter-spacing: 0.14rem;
+    }
+}

@@ -10,6 +10,7 @@ const ru = {
     githubPlaceholder: 'https://github.com/username',
     badgesLabel: 'Вставьте badge HTML (<img> теги)',
     badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
+    formatLabel: 'Формат вывода',
     generateButton: 'Сгенерировать код',
     resultLabel: 'Готовый код для README.md',
     statusProcessing: 'Обработка...',
@@ -22,7 +23,12 @@ const ru = {
     copySuccess: 'Код скопирован в буфер обмена.',
     copyError: 'Не удалось скопировать код.',
     errorApi: 'Ошибка API: {status} {statusText}',
-    errorGeneric: 'Ошибка: {message}'
+    errorGeneric: 'Ошибка: {message}',
+    matchBadge: 'Badge',
+    matchCategory: 'Категория',
+    matchRepo: 'Репозиторий',
+    matchScore: 'Скор',
+    matchConfidence: 'Уверенность'
 };
 
 export default ru;

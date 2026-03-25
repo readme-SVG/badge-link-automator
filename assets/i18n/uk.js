@@ -10,6 +10,7 @@ const uk = {
     githubPlaceholder: 'https://github.com/username',
     badgesLabel: 'Вставте badge HTML (<img> теги)',
     badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
+    formatLabel: 'Формат виводу',
     generateButton: 'Згенерувати код',
     resultLabel: 'Згенерований код для README.md',
     statusProcessing: 'Обробка...',
@@ -22,7 +23,12 @@ const uk = {
     copySuccess: 'Код скопійовано в буфер обміну.',
     copyError: 'Не вдалося скопіювати код.',
     errorApi: 'Помилка API: {status} {statusText}',
-    errorGeneric: 'Помилка: {message}'
+    errorGeneric: 'Помилка: {message}',
+    matchBadge: 'Badge',
+    matchCategory: 'Категорія',
+    matchRepo: 'Репозиторій',
+    matchScore: 'Скор',
+    matchConfidence: 'Впевненість'
 };
 
 export default uk;

@@ -272,6 +272,145 @@ img {
     filter: sepia(0.4) contrast(1.1);
 }
 
+/* ─── Format Toggle ──────────────────────────────────────────────── */
+
+.format-block {
+    border-top: none;
+    padding-top: 0;
+    padding-bottom: 0.5rem;
+}
+
+.format-toggle {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+}
+
+.format-option {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font: 500 0.92rem 'Lora', 'PT Serif', Georgia, serif;
+    transition: color 0.2s ease;
+}
+
+.format-option:hover {
+    color: var(--ink-cream);
+}
+
+.format-option input[type="radio"] {
+    width: auto;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 1px solid rgba(232, 224, 208, 0.35);
+    border-radius: 50%;
+    background: var(--ink-black);
+    cursor: pointer;
+    padding: 0;
+    position: relative;
+    transition: border-color 0.2s ease;
+}
+
+.format-option input[type="radio"]:checked {
+    border-color: var(--ink-red);
+}
+
+.format-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border-radius: 50%;
+    background: var(--ink-red);
+}
+
+.format-option input[type="radio"]:checked + span {
+    color: var(--ink-cream);
+}
+
+/* ─── Match Summary Table ────────────────────────────────────────── */
+
+.match-summary-container {
+    margin-top: 1.2rem;
+}
+
+.match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.match-table thead th {
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12rem;
+    font: 700 0.68rem/1 'Libre Baskerville', Georgia, serif;
+    padding: 0.5rem 0.55rem;
+    border-bottom: 1px dashed rgba(232, 224, 208, 0.2);
+    text-align: left;
+}
+
+.match-table tbody td {
+    padding: 0.4rem 0.55rem;
+    border-bottom: 1px solid rgba(232, 224, 208, 0.06);
+    vertical-align: top;
+}
+
+.match-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.match-tech {
+    font-family: 'Courier New', Courier, monospace;
+    color: var(--ink-cream);
+    font-weight: 600;
+}
+
+.match-cat {
+    color: var(--ink-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06rem;
+}
+
+.match-repo a {
+    color: var(--ink-cream);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(232, 224, 208, 0.25);
+    transition: border-color 0.2s ease;
+}
+
+.match-repo a:hover {
+    border-color: var(--ink-red);
+}
+
+.match-score {
+    font-family: 'Courier New', Courier, monospace;
+    text-align: right;
+    color: var(--ink-muted);
+}
+
+.match-conf {
+    text-transform: uppercase;
+    letter-spacing: 0.06rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.match-high .match-conf { color: #4a9; }
+.match-mid .match-conf  { color: #b96; }
+.match-low .match-conf  { color: #b55; }
+
+.match-high .match-score { color: #4a9; }
+.match-mid .match-score  { color: #b96; }
+.match-low .match-score  { color: #b55; }
+
 @media (max-width: 980px) {
     .split-layout {
         grid-template-columns: 1fr;
@@ -301,5 +440,14 @@ img {
     .section-label,
     .field-label {
         letter-spacing: 0.14rem;
+    }
+
+    .match-table {
+        font-size: 0.78rem;
+    }
+
+    .match-table thead th,
+    .match-table tbody td {
+        padding: 0.3rem 0.35rem;
     }
 }

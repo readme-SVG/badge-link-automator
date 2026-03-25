@@ -31,6 +31,20 @@
                     <textarea id="badgesInput" rows="8" data-i18n-placeholder="badgesPlaceholder" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
                 </div>
 
+                <div class="field-block format-block">
+                    <span class="field-label" data-i18n="formatLabel">Output format</span>
+                    <div class="format-toggle">
+                        <label class="format-option">
+                            <input type="radio" name="outputFormat" value="html" checked>
+                            <span>HTML</span>
+                        </label>
+                        <label class="format-option">
+                            <input type="radio" name="outputFormat" value="markdown">
+                            <span>Markdown</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="action-row">
                     <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
                     <button class="copy-btn" onclick="copyResultCode()" data-i18n="copyButton">Copy code</button>
@@ -42,6 +56,8 @@
                     <label for="resultOutput" class="field-label" data-i18n="resultLabel">Generated code for README.md</label>
                     <textarea id="resultOutput" rows="12" readonly></textarea>
                 </div>
+
+                <div id="matchSummary" class="match-summary-container"></div>
             </section>
         </section>
     </main>

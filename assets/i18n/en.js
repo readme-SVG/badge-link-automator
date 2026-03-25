@@ -10,6 +10,7 @@ const en = {
     githubPlaceholder: 'https://github.com/username',
     badgesLabel: 'Paste badge HTML (<img> tags)',
     badgesPlaceholder: '<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />',
+    formatLabel: 'Output format',
     generateButton: 'Generate code',
     resultLabel: 'Generated code for README.md',
     statusProcessing: 'Processing...',
@@ -22,7 +23,12 @@ const en = {
     copySuccess: 'Code copied to clipboard.',
     copyError: 'Could not copy code.',
     errorApi: 'API error: {status} {statusText}',
-    errorGeneric: 'Error: {message}'
+    errorGeneric: 'Error: {message}',
+    matchBadge: 'Badge',
+    matchCategory: 'Category',
+    matchRepo: 'Repository',
+    matchScore: 'Score',
+    matchConfidence: 'Confidence'
 };
 
 export default en;

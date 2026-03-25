@@ -1,0 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+
+:root {
+    --paper-dark: #111010;
+    --paper-dark-soft: #130f0f;
+    --ink-black: #0a0808;
+    --ink-cream: #e8e0d0;
+    --ink-red: #8b1a1a;
+    --ink-blue: #1a3a5c;
+    --ink-muted: rgba(232, 224, 208, 0.72);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    position: relative;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, var(--paper-dark) 0%, var(--paper-dark-soft) 100%);
+    color: var(--ink-cream);
+    font-family: 'Lora', 'PT Serif', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.8;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: -6%;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 12% 20%, rgba(139, 26, 26, 0.08) 0 17%, transparent 54%),
+        radial-gradient(circle at 85% 16%, rgba(26, 58, 92, 0.06) 0 18%, transparent 56%),
+        radial-gradient(circle at 68% 82%, rgba(139, 26, 26, 0.05) 0 14%, transparent 52%);
+}
+
+.language-panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 11;
+    display: grid;
+    gap: 0.3rem;
+    background: rgba(18, 14, 14, 0.92);
+    border: 1px dashed rgba(232, 224, 208, 0.15);
+    padding: 0.55rem 0.72rem;
+    min-width: 175px;
+}
+
+.language-label {
+    margin: 0;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.16rem;
+    font: 700 0.67rem/1 'Libre Baskerville', Georgia, serif;
+}
+
+.language-select {
+    appearance: none;
+    border: 1px solid rgba(232, 224, 208, 0.28);
+    background: var(--ink-black);
+    color: var(--ink-cream);
+    padding: 0.36rem 0.46rem;
+    border-radius: 2px;
+    font: 500 0.95rem 'Lora', 'PT Serif', Georgia, serif;
+}
+
+.editorial-shell {
+    position: relative;
+    z-index: 1;
+    width: min(1180px, 92vw);
+    margin: 0 auto;
+    padding: 2.2rem 0 4.6rem;
+}
+
+.masthead {
+    position: relative;
+    display: grid;
+    gap: 0.8rem;
+    padding: 1.2rem 0 2rem;
+    border-bottom: 1px dashed rgba(232, 224, 208, 0.15);
+}
+
+.masthead::before {
+    content: '❧';
+    position: absolute;
+    bottom: -1.03rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(232, 224, 208, 0.55);
+    background: linear-gradient(180deg, var(--paper-dark) 0%, var(--paper-dark-soft) 100%);
+    padding: 0 0.55rem;
+    font-size: 1rem;
+}
+
+.masthead::after {
+    content: '';
+    position: absolute;
+    top: 0.35rem;
+    right: 0.9rem;
+    width: 82px;
+    height: 56px;
+    opacity: 0.13;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 12% 42%, var(--ink-red) 0 8px, transparent 9px),
+        radial-gradient(circle at 45% 18%, var(--ink-red) 0 4px, transparent 5px),
+        radial-gradient(circle at 68% 64%, var(--ink-blue) 0 6px, transparent 7px),
+        radial-gradient(circle at 86% 40%, var(--ink-red) 0 5px, transparent 6px),
+        radial-gradient(circle at 34% 78%, var(--ink-blue) 0 3px, transparent 4px);
+}
+
+.section-label {
+    margin: 0;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.28rem;
+    font: 700 0.72rem/1 'Libre Baskerville', Georgia, serif;
+}
+
+h1 {
+    margin: 0;
+    max-width: 10.8ch;
+    font-family: 'Libre Baskerville', 'Playfair Display', Georgia, serif;
+    font-size: clamp(3.4rem, 8.8vw, 6.2rem);
+    line-height: 0.96;
+    letter-spacing: 0.01em;
+    color: var(--ink-cream);
+}
+
+.dek {
+    margin: 0;
+    max-width: 64ch;
+    color: rgba(232, 224, 208, 0.78);
+    font-size: clamp(1rem, 1.34vw, 1.2rem);
+}
+
+.editorial-grid {
+    display: grid;
+    grid-template-columns: minmax(250px, 0.95fr) minmax(0, 1.65fr);
+    gap: clamp(1.5rem, 2.8vw, 3.1rem);
+    align-items: start;
+    padding-top: 2rem;
+}
+
+.lead-column {
+    position: sticky;
+    top: 1rem;
+    display: grid;
+    gap: 1.2rem;
+    padding: 1rem;
+    background: rgba(14, 11, 11, 0.58);
+    border: 1px dashed rgba(232, 224, 208, 0.15);
+}
+
+.pull-quote {
+    margin: 0;
+    padding: 0.25rem 0 0.15rem 1rem;
+    border-left: 3px solid rgba(232, 224, 208, 0.42);
+    color: rgba(232, 224, 208, 0.76);
+    font-family: 'Lora', 'PT Serif', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(1.45rem, 3.1vw, 2.4rem);
+    line-height: 1.35;
+}
+
+.support-copy {
+    margin: 0;
+    color: rgba(232, 224, 208, 0.72);
+    font-size: 1rem;
+}
+
+.form-column {
+    display: grid;
+    gap: 1rem;
+    padding: 1.05rem;
+    background: rgba(14, 11, 11, 0.58);
+    border: 1px dashed rgba(232, 224, 208, 0.15);
+}
+
+.field-block {
+    display: grid;
+    gap: 0.45rem;
+    padding: 1rem 0;
+    border-top: 1px dashed rgba(232, 224, 208, 0.15);
+}
+
+.field-block:first-child {
+    border-top: none;
+}
+
+.field-label {
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.19rem;
+    font: 700 0.75rem/1 'Libre Baskerville', Georgia, serif;
+}
+
+input,
+textarea {
+    width: 100%;
+    border: 1px solid rgba(232, 224, 208, 0.25);
+    background: #120e0e;
+    color: var(--ink-cream);
+    padding: 0.8rem 0.92rem;
+    border-radius: 2px;
+    outline: none;
+    font: 500 1rem 'Lora', 'PT Serif', Georgia, serif;
+    line-height: 1.8;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: rgba(232, 224, 208, 0.45);
+}
+
+input:focus,
+textarea:focus,
+.language-select:focus {
+    border-color: rgba(139, 26, 26, 0.8);
+    background: #171111;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 180px;
+}
+
+.generate-btn {
+    justify-self: start;
+    border: 1px solid #2b1616;
+    background: #1a0f0f;
+    color: var(--ink-cream);
+    padding: 0.72rem 1.25rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.12rem;
+    font: 700 0.82rem/1 'Libre Baskerville', Georgia, serif;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.generate-btn:hover {
+    background: #281414;
+    color: #efe8db;
+}
+
+.status {
+    min-height: 1.65rem;
+    color: rgba(232, 224, 208, 0.7);
+    font-size: 0.95rem;
+}
+
+.error {
+    color: #b93b3b;
+}
+
+.output-block {
+    position: relative;
+    border-bottom: 1px dashed rgba(232, 224, 208, 0.15);
+    margin-top: 0.2rem;
+    padding-bottom: 1.4rem;
+}
+
+.output-block::after {
+    content: '✦';
+    position: absolute;
+    bottom: -0.8rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(232, 224, 208, 0.5);
+    background: rgba(18, 14, 14, 0.95);
+    padding: 0 0.5rem;
+}
+
+img {
+    filter: sepia(0.4) contrast(1.1);
+}
+
+@media (max-width: 980px) {
+    .editorial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lead-column {
+        position: static;
+    }
+}
+
+@media (max-width: 680px) {
+    .editorial-shell {
+        width: min(1100px, 92vw);
+        padding-top: 1.45rem;
+    }
+
+    .language-panel {
+        right: 0.7rem;
+        top: 0.7rem;
+        min-width: 155px;
+    }
+
+    h1 {
+        font-size: clamp(3rem, 13vw, 4.8rem);
+    }
+
+    .section-label,
+    .field-label {
+        letter-spacing: 0.14rem;
+    }
+}

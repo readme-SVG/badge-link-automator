@@ -1,0 +1,31 @@
+name: Lint
+
+on:
+  pull_request:
+  push:
+    branches: ["main", "master"]
+
+permissions:
+  contents: read
+
+jobs:
+  super-linter:
+    name: Super Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Super Linter
+        uses: github/super-linter@v7
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          DEFAULT_BRANCH: main
+          VALIDATE_JAVASCRIPT_STANDARD: true
+          VALIDATE_CSS: true
+          VALIDATE_HTML: true
+          VALIDATE_YAML: true
+          FILTER_REGEX_EXCLUDE: ".git/"
+          # Set this to your default branch if it is not `main`.
+          # DEFAULT_BRANCH is used for changed-file detection in pull requests.

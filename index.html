@@ -7,36 +7,44 @@
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
+    <div class="language-panel" aria-label="Language selector">
+        <label for="languageSelect" class="language-label" data-i18n="languageLabel">Language</label>
+        <select id="languageSelect" class="language-select">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+        </select>
+    </div>
+
     <main class="editorial-shell">
         <header class="masthead">
-            <p class="section-label">Utility</p>
-            <h1>GitHub Badge Linker</h1>
-            <p class="dek">Convert raw badge image tags into repository-linked snippets with one pass.</p>
+            <p class="section-label" data-i18n="topLabel">Utility</p>
+            <h1 data-i18n="title">GitHub Badge Linker</h1>
+            <p class="dek" data-i18n="subtitle">Convert raw badge image tags into repository-linked snippets with one pass.</p>
         </header>
 
         <section class="editorial-grid" aria-label="Badge linker form">
             <aside class="lead-column">
-                <p class="section-label">Context</p>
-                <blockquote class="pull-quote">Type is the interface. Structure is the style.</blockquote>
-                <p class="support-copy">Enter your profile, paste badge tags, and export production-ready README markup in seconds.</p>
+                <p class="section-label" data-i18n="contextLabel">Context</p>
+                <blockquote class="pull-quote" data-i18n="quote">Type is the interface. Structure is the style.</blockquote>
+                <p class="support-copy" data-i18n="supportCopy">Enter your profile, paste badge tags, and export production-ready README markup in seconds.</p>
             </aside>
 
             <section class="form-column">
                 <div class="field-block">
-                    <label for="githubUrl" class="field-label">GitHub profile URL</label>
-                    <input type="text" id="githubUrl" placeholder="https://github.com/username">
+                    <label for="githubUrl" class="field-label" data-i18n="githubLabel">GitHub profile URL</label>
+                    <input type="text" id="githubUrl" data-i18n-placeholder="githubPlaceholder" placeholder="https://github.com/username">
                 </div>
 
                 <div class="field-block">
-                    <label for="badgesInput" class="field-label">Paste badge HTML (&lt;img&gt; tags)</label>
-                    <textarea id="badgesInput" rows="8" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
+                    <label for="badgesInput" class="field-label" data-i18n="badgesLabel">Paste badge HTML (&lt;img&gt; tags)</label>
+                    <textarea id="badgesInput" rows="8" data-i18n-placeholder="badgesPlaceholder" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
                 </div>
 
-                <button class="generate-btn" onclick="generateLinks()">Generate code</button>
+                <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
                 <div id="statusMessage" class="status"></div>
 
                 <div class="field-block output-block">
-                    <label for="resultOutput" class="field-label">Generated code for README.md</label>
+                    <label for="resultOutput" class="field-label" data-i18n="resultLabel">Generated code for README.md</label>
                     <textarea id="resultOutput" rows="12" readonly></textarea>
                 </div>
             </section>

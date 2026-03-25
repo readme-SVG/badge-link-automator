@@ -25,6 +25,35 @@ body {
     line-height: 1.6;
 }
 
+.language-panel {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    gap: 0.35rem;
+    z-index: 10;
+    background: rgba(12, 12, 12, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.55rem 0.65rem;
+    min-width: 150px;
+}
+
+.language-label {
+    margin: 0;
+    font: 700 0.65rem/1 'Syne', 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.18rem;
+    color: var(--gray);
+}
+
+.language-select {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: transparent;
+    color: var(--white);
+    padding: 0.35rem 0.4rem;
+    font: 500 0.95rem 'IBM Plex Serif', Georgia, serif;
+}
+
 .editorial-shell {
     width: min(1200px, 94vw);
     margin: 0 auto;
@@ -133,7 +162,8 @@ textarea::placeholder {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+.language-select:focus {
     border-color: var(--accent);
     background: rgba(255, 45, 45, 0.04);
 }
@@ -191,6 +221,12 @@ textarea {
     .editorial-shell {
         width: min(1100px, 92vw);
         padding-top: 1.2rem;
+    }
+
+    .language-panel {
+        top: 0.6rem;
+        right: 0.6rem;
+        min-width: 130px;
     }
 
     h1 {

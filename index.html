@@ -21,9 +21,21 @@
             </aside>
 
             <section class="workspace-column">
+                <!-- Main profile URL -->
                 <div class="field-block">
                     <label for="githubUrl" class="field-label" data-i18n="githubLabel">GitHub profile URL</label>
                     <input type="text" id="githubUrl" data-i18n-placeholder="githubPlaceholder" placeholder="https://github.com/username">
+                </div>
+
+                <!-- Organization URLs (dynamic) -->
+                <div class="field-block org-block">
+                    <div class="org-header">
+                        <span class="field-label" data-i18n="orgLabel">Organization URLs (optional)</span>
+                        <button type="button" class="org-add-btn" id="orgAddBtn" title="Add organization URL">+</button>
+                    </div>
+                    <div id="orgUrlList" class="org-url-list">
+                        <!-- dynamic rows inserted here by JS -->
+                    </div>
                 </div>
 
                 <div class="field-block">

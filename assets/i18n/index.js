@@ -16,20 +16,7 @@ import cs from './cs.js';
 export const DEFAULT_LOCALE = 'en';
 
 export const TRANSLATIONS = {
-    en,
-    zh,
-    es,
-    fr,
-    pt,
-    ru,
-    ja,
-    de,
-    uk,
-    pl,
-    nl,
-    kk,
-    sv,
-    cs
+    en, zh, es, fr, pt, ru, ja, de, uk, pl, nl, kk, sv, cs
 };
 
 export const LOCALE_OPTIONS = [
@@ -54,22 +41,15 @@ const REQUIRED_KEYS = Object.keys(TRANSLATIONS[DEFAULT_LOCALE]);
 function validateTranslationKeys() {
     Object.entries(TRANSLATIONS).forEach(([localeCode, localeDictionary]) => {
         if (localeCode === DEFAULT_LOCALE) return;
-
         const localeKeys = Object.keys(localeDictionary);
         const missing = REQUIRED_KEYS.filter((key) => !localeKeys.includes(key));
         const extra = localeKeys.filter((key) => !REQUIRED_KEYS.includes(key));
 
-        // Warn for missing keys (will fallback to default locale)
         if (missing.length) {
-            console.warn(
-                `Locale "${localeCode}" missing keys (will use English fallback): [${missing.join(', ')}]`
-            );
+            console.warn(`Locale "${localeCode}" missing keys (English fallback): [${missing.join(', ')}]`);
         }
-        // Throw for extra keys (likely a typo/stale key)
         if (extra.length) {
-            throw new Error(
-                `Locale "${localeCode}" has extra keys: [${extra.join(', ')}]`
-            );
+            throw new Error(`Locale "${localeCode}" has extra keys: [${extra.join(', ')}]`);
         }
     });
 }

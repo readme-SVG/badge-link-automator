@@ -1,178 +1,56 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Badge Linker</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        h1 {
-            color: #58a6ff;
-            text-align: center;
-        }
-        .container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            background-color: #161b22;
-            border: 1px solid #30363d;
-            color: #c9d1d9;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-family: monospace;
-        }
-        textarea {
-            resize: vertical;
-        }
-        button {
-            background-color: #238636;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        button:hover {
-            background-color: #2ea043;
-        }
-        .status {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #8b949e;
-        }
-        .error {
-            color: #ff7b72;
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-
-    <h1>GitHub Badge Linker</h1>
-    
-    <div class="container">
-        <div>
-            <label for="githubUrl">Ссылка на профиль GitHub:</label>
-            <input type="text" id="githubUrl" placeholder="https://github.com/username">
-        </div>
-
-        <div>
-            <label for="badgesInput">Вставьте баджи (HTML теги &lt;img&gt;):</label>
-            <textarea id="badgesInput" rows="8" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
-        </div>
-
-        <button onclick="generateLinks()">Сгенерировать код</button>
-        <div id="statusMessage" class="status"></div>
-
-        <div>
-            <label for="resultOutput">Готовый код для README.md:</label>
-            <textarea id="resultOutput" rows="12" readonly></textarea>
-        </div>
+    <div class="language-panel" aria-label="Language selector">
+        <label for="languageSelect" class="language-label" data-i18n="languageLabel">Language</label>
+        <select id="languageSelect" class="language-select">
+            <option value="en">English</option>
+            <option value="ru">Русский</option>
+        </select>
     </div>
 
-    <script>
-        async function generateLinks() {
-            const githubUrl = document.getElementById('githubUrl').value.trim();
-            const badgesInput = document.getElementById('badgesInput').value.trim();
-            const resultOutput = document.getElementById('resultOutput');
-            const statusMessage = document.getElementById('statusMessage');
+    <main class="editorial-shell">
+        <header class="masthead">
+            <p class="section-label" data-i18n="topLabel">Utility</p>
+            <h1 data-i18n="title">GitHub Badge Linker</h1>
+            <p class="dek" data-i18n="subtitle">Convert raw badge image tags into repository-linked snippets with one pass.</p>
+        </header>
 
-            resultOutput.value = '';
-            statusMessage.textContent = 'Обработка...';
-            statusMessage.className = 'status';
+        <section class="editorial-grid" aria-label="Badge linker form">
+            <aside class="lead-column">
+                <p class="section-label" data-i18n="contextLabel">Context</p>
+                <blockquote class="pull-quote" data-i18n="quote">Type is the interface. Structure is the style.</blockquote>
+                <p class="support-copy" data-i18n="supportCopy">Enter your profile, paste badge tags, and export production-ready README markup in seconds.</p>
+            </aside>
 
-            const usernameMatch = githubUrl.match(/github\.com\/([^\/]+)/i);
-            if (!usernameMatch) {
-                statusMessage.textContent = 'Ошибка: Неверный формат ссылки на GitHub профиль.';
-                statusMessage.className = 'status error';
-                return;
-            }
-            const username = usernameMatch[1];
+            <section class="form-column">
+                <div class="field-block">
+                    <label for="githubUrl" class="field-label" data-i18n="githubLabel">GitHub profile URL</label>
+                    <input type="text" id="githubUrl" data-i18n-placeholder="githubPlaceholder" placeholder="https://github.com/username">
+                </div>
 
-            try {
-                statusMessage.textContent = `Получение данных для пользователя ${username}...`;
-                const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`);
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка API: ${response.status} ${response.statusText}`);
-                }
-                
-                const repos = await response.json();
-                
-                if (repos.length === 0) {
-                    throw new Error('У пользователя нет публичных репозиториев.');
-                }
+                <div class="field-block">
+                    <label for="badgesInput" class="field-label" data-i18n="badgesLabel">Paste badge HTML (&lt;img&gt; tags)</label>
+                    <textarea id="badgesInput" rows="8" data-i18n-placeholder="badgesPlaceholder" placeholder='<img src="https://img.shields.io/badge/Vercel-3e80ed?style=for-the-badge&logo=vercel&logoColor=white" />'></textarea>
+                </div>
 
-                const imgRegex = /<img[^>]+>/gi;
-                const images = badgesInput.match(imgRegex);
+                <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
+                <div id="statusMessage" class="status"></div>
 
-                if (!images) {
-                    statusMessage.textContent = 'Ошибка: Не найдено ни одного тега <img>.';
-                    statusMessage.className = 'status error';
-                    return;
-                }
+                <div class="field-block output-block">
+                    <label for="resultOutput" class="field-label" data-i18n="resultLabel">Generated code for README.md</label>
+                    <textarea id="resultOutput" rows="12" readonly></textarea>
+                </div>
+            </section>
+        </section>
+    </main>
 
-                let finalHtml = '';
-
-                images.forEach(imgTag => {
-                    let techName = "";
-                    const badgeMatch = imgTag.match(/badge\/([a-z0-9_%\+]+)-/i);
-                    const logoMatch = imgTag.match(/logo=([a-z0-9_]+)/i);
-                    
-                    if (badgeMatch) techName = decodeURIComponent(badgeMatch[1]).toLowerCase();
-                    if (!techName && logoMatch) techName = logoMatch[1].toLowerCase();
-
-                    let matchedRepoUrl = null;
-
-                    if (techName) {
-                        const foundRepo = repos.find(repo => {
-                            const langMatch = repo.language && repo.language.toLowerCase() === techName;
-                            const descMatch = repo.description && repo.description.toLowerCase().includes(techName);
-                            const nameMatch = repo.name.toLowerCase().includes(techName);
-                            const topicMatch = repo.topics && repo.topics.includes(techName);
-                            const homepageMatch = repo.homepage && repo.homepage.toLowerCase().includes(techName);
-                            
-                            return langMatch || descMatch || nameMatch || topicMatch || homepageMatch;
-                        });
-
-                        if (foundRepo) {
-                            matchedRepoUrl = foundRepo.html_url;
-                        }
-                    }
-
-                    if (!matchedRepoUrl) {
-                        const randomIndex = Math.floor(Math.random() * repos.length);
-                        matchedRepoUrl = repos[randomIndex].html_url;
-                    }
-
-                    finalHtml += `<a href="${matchedRepoUrl}" target="_blank">\n  ${imgTag}\n</a>\n\n`;
-                });
-
-                resultOutput.value = finalHtml.trim();
-                statusMessage.textContent = 'Готово! Код успешно сгенерирован.';
-
-            } catch (error) {
-                statusMessage.textContent = `Ошибка: ${error.message}`;
-                statusMessage.className = 'status error';
-            }
-        }
-    </script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

@@ -1,31 +1,17 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "ci"
-      include: "scope"
-
-  - package-ecosystem: "npm"
+  - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "04:00"
-      timezone: "Etc/UTC"
-    open-pull-requests-limit: 10
     labels:
       - "dependencies"
-      - "javascript"
-    versioning-strategy: "increase"
-    allow:
-      - dependency-type: "direct"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
+      - "python"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "actions"

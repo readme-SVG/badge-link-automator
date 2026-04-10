@@ -2,16 +2,23 @@ name: Dependabot Auto Merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [opened, reopened, synchronize, ready_for_review]
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: read-all
+
+concurrency:
+  group: dependabot-merge-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
-  dependabot:
-    if: github.actor == 'dependabot[bot]'
+  automerge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -19,19 +26,20 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Approve safe dependency updates
+      - name: Approve safe non-breaking updates
         if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
-        uses: hmarr/auto-approve-action@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Enable PR auto-merge for safe updates
-        if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          github.event.pull_request.draft == false &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+        run: gh pr review "${{ github.event.pull_request.number }}" --approve
+
+      - name: Enable auto-merge for safe non-breaking updates
+        if: |
+          github.event.pull_request.draft == false &&
+          (steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+           steps.metadata.outputs.update-type == 'version-update:semver-minor')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge "${{ github.event.pull_request.number }}" --auto --merge

@@ -49,7 +49,8 @@ function validateTranslationKeys() {
             console.warn(`Locale "${localeCode}" missing keys (English fallback): [${missing.join(', ')}]`);
         }
         if (extra.length) {
-            throw new Error(`Locale "${localeCode}" has extra keys: [${extra.join(', ')}]`);
+            // Non-fatal: one stale key in a single locale must not break the whole app.
+            console.error(`Locale "${localeCode}" has extra keys (ignored): [${extra.join(', ')}]`);
         }
     });
 }

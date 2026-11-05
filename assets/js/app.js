@@ -1,5 +1,7 @@
 import { DEFAULT_LOCALE, LOCALE_OPTIONS, getLocaleDictionary, isSupportedLocale } from '../i18n/index.js';
 
+// ─── Constants ───────────────────────────────────────────────────────
+
 const STORAGE_KEYS = {
     language: 'badge_linker_language',
     form: 'badge_linker_form_cache',
@@ -8,6 +10,9 @@ const STORAGE_KEYS = {
 
 const REPO_CACHE_TTL_MS = 15 * 60 * 1000;
 const MAX_REPO_PAGES = 5;
+const FORM_CACHE_DEBOUNCE_MS = 300;
+const GITHUB_API_BASE = 'https://api.github.com';
+const GITHUB_REPO_URL_PATTERN = /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/?$/;
 
 // ─── Badge Category System ───────────────────────────────────────────
 
@@ -345,7 +350,7 @@ function assignReposWithDedup(repos, imgTags, fallbackUrl) {
 
     return assignments.map(({ imgTag, repo, ranked }) => ({
         imgTag,
-        repoUrl: (repo && repo.html_url) || fallbackUrl,
+        repoUrl: sanitizeRepoUrl((repo && repo.html_url) || fallbackUrl),
         repoName: repo ? repo.full_name : null,
         score: ranked.length > 0 ? ranked[0].score : 0,
         techName: extractTechName(imgTag),
@@ -355,6 +360,24 @@ function assignReposWithDedup(repos, imgTags, fallbackUrl) {
 
 
 // ─── Output Formatting ──────────────────────────────────────────────
+
+/**
+ * Only GitHub repository URLs are allowed to end up in generated markup.
+ * Anything else falls back to the plain GitHub homepage.
+ */
+function sanitizeRepoUrl(url) {
+    return GITHUB_REPO_URL_PATTERN.test(url) ? url : 'https://github.com';
+}
+
+/** Escape a string for safe interpolation into HTML markup. */
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 function formatHtmlOutput(assignments) {
     return assignments.map(({ imgTag, repoUrl }) =>
@@ -390,7 +413,7 @@ function createOrgRow(value) {
     input.className = 'org-url-input';
     input.placeholder = t('orgPlaceholder');
     input.value = value || '';
-    input.addEventListener('input', saveFormCache);
+    input.addEventListener('input', debouncedSaveFormCache);
 
     const removeBtn = document.createElement('button');
     removeBtn.type = 'button';
@@ -474,23 +497,29 @@ function applyLanguage() {
     if (sel) sel.value = lang;
 }
 
-function loadFormCache() {
-    const raw = localStorage.getItem(STORAGE_KEYS.form);
-    if (!raw) return;
+function readJsonStorage(key) {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
     try {
-        const data = JSON.parse(raw);
-        if (typeof data.githubUrl === 'string') document.getElementById('githubUrl').value = data.githubUrl;
-        if (typeof data.badgesInput === 'string') document.getElementById('badgesInput').value = data.badgesInput;
-        if (typeof data.resultOutput === 'string') document.getElementById('resultOutput').value = data.resultOutput;
-        if (typeof data.outputFormat === 'string') {
-            const radio = document.querySelector(`input[name="outputFormat"][value="${data.outputFormat}"]`);
-            if (radio) radio.checked = true;
-        }
-        if (Array.isArray(data.orgUrls)) {
-            restoreOrgRows(data.orgUrls);
-        }
+        return JSON.parse(raw);
     } catch (_e) {
-        localStorage.removeItem(STORAGE_KEYS.form);
+        localStorage.removeItem(key);
+        return null;
+    }
+}
+
+function loadFormCache() {
+    const data = readJsonStorage(STORAGE_KEYS.form);
+    if (!data) return;
+    if (typeof data.githubUrl === 'string') document.getElementById('githubUrl').value = data.githubUrl;
+    if (typeof data.badgesInput === 'string') document.getElementById('badgesInput').value = data.badgesInput;
+    if (typeof data.resultOutput === 'string') document.getElementById('resultOutput').value = data.resultOutput;
+    if (typeof data.outputFormat === 'string') {
+        const radio = document.querySelector(`input[name="outputFormat"][value="${data.outputFormat}"]`);
+        if (radio) radio.checked = true;
+    }
+    if (Array.isArray(data.orgUrls)) {
+        restoreOrgRows(data.orgUrls);
     }
 }
 
@@ -506,29 +535,30 @@ function saveFormCache() {
     localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(payload));
 }
 
+/** Debounced variant so rapid typing does not hammer localStorage. */
+function debounce(fn, waitMs) {
+    let timer = null;
+    return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), waitMs);
+    };
+}
+const debouncedSaveFormCache = debounce(saveFormCache, FORM_CACHE_DEBOUNCE_MS);
+
 function getRepoCache(username) {
-    const raw = localStorage.getItem(STORAGE_KEYS.repos);
-    if (!raw) return null;
-    try {
-        const cache = JSON.parse(raw);
-        if (!cache[username]) return null;
-        const entry = cache[username];
-        if (Date.now() - entry.timestamp > REPO_CACHE_TTL_MS) {
-            delete cache[username];
-            localStorage.setItem(STORAGE_KEYS.repos, JSON.stringify(cache));
-            return null;
-        }
-        return entry.repos;
-    } catch (_e) {
-        localStorage.removeItem(STORAGE_KEYS.repos);
+    const cache = readJsonStorage(STORAGE_KEYS.repos);
+    if (!cache || !cache[username]) return null;
+    const entry = cache[username];
+    if (Date.now() - entry.timestamp > REPO_CACHE_TTL_MS) {
+        delete cache[username];
+        localStorage.setItem(STORAGE_KEYS.repos, JSON.stringify(cache));
         return null;
     }
+    return entry.repos;
 }
 
 function setRepoCache(username, repos) {
-    const raw = localStorage.getItem(STORAGE_KEYS.repos);
-    let cache = {};
-    if (raw) { try { cache = JSON.parse(raw); } catch (_e) { cache = {}; } }
+    const cache = readJsonStorage(STORAGE_KEYS.repos) || {};
     cache[username] = { timestamp: Date.now(), repos };
     localStorage.setItem(STORAGE_KEYS.repos, JSON.stringify(cache));
 }
@@ -546,56 +576,55 @@ function parseLinkHeader(header) {
     return links;
 }
 
-async function fetchReposForAccount(account) {
-    const cached = getRepoCache(account);
-    if (cached) return cached;
-
+async function fetchRepoPage(url, { onFirstPageNotFound } = {}) {
     let allRepos = [];
-    let url = `https://api.github.com/users/${account}/repos?per_page=100&sort=updated`;
+    let nextUrl = url;
     let page = 0;
 
-    while (url && page < MAX_REPO_PAGES) {
-        const resp = await fetch(url);
+    while (nextUrl && page < MAX_REPO_PAGES) {
+        const resp = await fetch(nextUrl);
         if (!resp.ok) {
-            // For orgs: if 404, try orgs endpoint instead
-            if (resp.status === 404 && page === 0) {
-                return await fetchReposForOrg(account);
+            if (resp.status === 404 && page === 0 && onFirstPageNotFound) {
+                return onFirstPageNotFound();
             }
             throw new Error(t('errorApi', { status: resp.status, statusText: resp.statusText }));
         }
         const repos = await resp.json();
         allRepos = allRepos.concat(repos);
-        const links = parseLinkHeader(resp.headers.get('Link'));
-        url = links.next || null;
+        nextUrl = parseLinkHeader(resp.headers.get('Link')).next || null;
         page++;
     }
 
-    setRepoCache(account, allRepos);
     return allRepos;
 }
 
-async function fetchReposForOrg(orgName) {
-    const cached = getRepoCache(`org:${orgName}`);
+async function fetchReposForAccount(account) {
+    const cached = getRepoCache(account);
     if (cached) return cached;
 
-    let allRepos = [];
-    let url = `https://api.github.com/orgs/${orgName}/repos?per_page=100&sort=updated`;
-    let page = 0;
+    // Account names come from user input; encode before placing in the URL.
+    const encoded = encodeURIComponent(account);
+    const repos = await fetchRepoPage(
+        `${GITHUB_API_BASE}/users/${encoded}/repos?per_page=100&sort=updated`,
+        { onFirstPageNotFound: () => fetchReposForOrg(account) }
+    );
 
-    while (url && page < MAX_REPO_PAGES) {
-        const resp = await fetch(url);
-        if (!resp.ok) {
-            throw new Error(t('errorApi', { status: resp.status, statusText: resp.statusText }));
-        }
-        const repos = await resp.json();
-        allRepos = allRepos.concat(repos);
-        const links = parseLinkHeader(resp.headers.get('Link'));
-        url = links.next || null;
-        page++;
-    }
+    setRepoCache(account, repos);
+    return repos;
+}
 
-    setRepoCache(`org:${orgName}`, allRepos);
-    return allRepos;
+async function fetchReposForOrg(orgName) {
+    const cacheKey = `org:${orgName}`;
+    const cached = getRepoCache(cacheKey);
+    if (cached) return cached;
+
+    const encoded = encodeURIComponent(orgName);
+    const repos = await fetchRepoPage(
+        `${GITHUB_API_BASE}/orgs/${encoded}/repos?per_page=100&sort=updated`
+    );
+
+    setRepoCache(cacheKey, repos);
+    return repos;
 }
 
 /**
@@ -666,11 +695,12 @@ function renderMatchSummary(assignments) {
     const rows = assignments.map(({ techName, repoUrl, repoName, score, category }) => {
         const confidence = score >= 200 ? 'high' : score >= 80 ? 'mid' : 'low';
         const repoDisplay = repoName || repoUrl.replace('https://github.com/', '');
-        const safeUrl = repoUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        // All interpolated values are escaped: badge names come from user-pasted markup.
+        const safeUrl = escapeHtml(repoUrl);
         return `<tr class="match-${confidence}">
-            <td class="match-tech">${techName || '?'}</td>
-            <td class="match-cat">${category}</td>
-            <td class="match-repo"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${repoDisplay}</a></td>
+            <td class="match-tech">${escapeHtml(techName || '?')}</td>
+            <td class="match-cat">${escapeHtml(category)}</td>
+            <td class="match-repo"><a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(repoDisplay)}</a></td>
             <td class="match-score">${Math.round(score)}</td>
             <td class="match-conf">${confidence}</td>
         </tr>`;
@@ -696,6 +726,11 @@ function getOutputFormat() {
     return radio ? radio.value : 'html';
 }
 
+function setStatus(statusMsg, key, variables = {}, isError = false) {
+    statusMsg.textContent = t(key, variables);
+    statusMsg.className = isError ? 'status error' : 'status';
+}
+
 async function generateLinks() {
     const githubUrl = document.getElementById('githubUrl').value.trim();
     const badgesInput = document.getElementById('badgesInput').value.trim();
@@ -704,13 +739,11 @@ async function generateLinks() {
 
     resultOutput.value = '';
     renderMatchSummary([]);
-    statusMsg.textContent = t('statusProcessing');
-    statusMsg.className = 'status';
+    setStatus(statusMsg, 'statusProcessing');
 
     const mainName = extractGitHubName(githubUrl);
     if (!mainName) {
-        statusMsg.textContent = t('errorInvalidUrl');
-        statusMsg.className = 'status error';
+        setStatus(statusMsg, 'errorInvalidUrl', {}, true);
         return;
     }
 
@@ -722,8 +755,7 @@ async function generateLinks() {
 
         const images = badgesInput.match(/<img[^>]+>/gi);
         if (!images) {
-            statusMsg.textContent = t('errorNoImg');
-            statusMsg.className = 'status error';
+            setStatus(statusMsg, 'errorNoImg', {}, true);
             return;
         }
 
@@ -736,11 +768,10 @@ async function generateLinks() {
             : formatHtmlOutput(assignments);
 
         renderMatchSummary(assignments);
-        statusMsg.textContent = t('statusDone');
+        setStatus(statusMsg, 'statusDone');
         saveFormCache();
     } catch (error) {
-        statusMsg.textContent = t('errorGeneric', { message: error.message });
-        statusMsg.className = 'status error';
+        setStatus(statusMsg, 'errorGeneric', { message: error.message }, true);
     }
 }
 
@@ -749,20 +780,22 @@ async function copyResultCode() {
     const statusMsg = document.getElementById('statusMessage');
 
     if (!resultOutput.value.trim()) {
-        statusMsg.textContent = t('errorGeneric', { message: t('errorNoImg') });
-        statusMsg.className = 'status error';
+        setStatus(statusMsg, 'errorGeneric', { message: t('errorNoImg') }, true);
         return;
     }
 
     try {
         await navigator.clipboard.writeText(resultOutput.value);
-        statusMsg.textContent = t('copySuccess');
-        statusMsg.className = 'status';
+        setStatus(statusMsg, 'copySuccess');
     } catch (_e) {
-        statusMsg.textContent = t('copyError');
-        statusMsg.className = 'status error';
+        setStatus(statusMsg, 'copyError', {}, true);
     }
 }
+
+const ACTION_HANDLERS = {
+    generate: generateLinks,
+    copy: copyResultCode
+};
 
 function initializeApp() {
     const langSelect = document.getElementById('languageSelect');
@@ -780,12 +813,16 @@ function initializeApp() {
         applyLanguage();
     });
 
-    githubInput.addEventListener('input', saveFormCache);
-    badgesEl.addEventListener('input', saveFormCache);
+    githubInput.addEventListener('input', debouncedSaveFormCache);
+    badgesEl.addEventListener('input', debouncedSaveFormCache);
     formatRadios.forEach((r) => r.addEventListener('change', saveFormCache));
     orgAddBtn.addEventListener('click', () => addOrgRow(''));
+
+    // Bind action buttons via data-action attributes (no inline handlers, CSP-friendly).
+    document.querySelectorAll('[data-action]').forEach((btn) => {
+        const handler = ACTION_HANDLERS[btn.dataset.action];
+        if (handler) btn.addEventListener('click', handler);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);
-window.generateLinks = generateLinks;
-window.copyResultCode = copyResultCode;

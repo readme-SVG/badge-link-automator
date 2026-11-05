@@ -20,6 +20,10 @@
                 <p class="section-label" data-i18n="topLabel">Utility</p>
                 <h1 data-i18n="title">GitHub Badge Linker</h1>
                 <p class="dek" data-i18n="subtitle">Convert raw badge image tags into repository-linked snippets with one pass.</p>
+                <div class="brand-note">
+                    <span data-i18n="contextLabel">Context</span>
+                    <p data-i18n="supportCopy">Enter your profile, paste badge tags, and export production-ready README markup in seconds.</p>
+                </div>
             </aside>
 
             <section class="workspace-column">
@@ -33,7 +37,7 @@
                 <div class="field-block org-block">
                     <div class="org-header">
                         <span class="field-label" data-i18n="orgLabel">Organization URLs (optional)</span>
-                        <button type="button" class="org-add-btn" id="orgAddBtn" title="Add organization URL">+</button>
+                        <button type="button" class="org-add-btn" id="orgAddBtn" title="Add organization URL" aria-label="Add organization URL" data-i18n-title="orgAddTitle">+</button>
                     </div>
                     <div id="orgUrlList" class="org-url-list">
                         <!-- dynamic rows inserted here by JS -->
@@ -47,7 +51,7 @@
 
                 <div class="field-block format-block">
                     <span class="field-label" data-i18n="formatLabel">Output format</span>
-                    <div class="format-toggle">
+                    <div class="format-toggle" role="radiogroup" aria-label="Output format" data-i18n-aria-label="formatLabel">
                         <label class="format-option">
                             <input type="radio" name="outputFormat" value="html" checked>
                             <span>HTML</span>
@@ -60,18 +64,18 @@
                 </div>
 
                 <div class="action-row">
-                    <button class="generate-btn" onclick="generateLinks()" data-i18n="generateButton">Generate code</button>
-                    <button class="copy-btn" onclick="copyResultCode()" data-i18n="copyButton">Copy code</button>
+                    <button class="generate-btn" type="button" data-action="generate" data-i18n="generateButton">Generate code</button>
+                    <button class="copy-btn" type="button" data-action="copy" data-i18n="copyButton">Copy code</button>
                 </div>
 
-                <div id="statusMessage" class="status"></div>
+                <div id="statusMessage" class="status" role="status" aria-live="polite"></div>
 
                 <div class="field-block output-block">
                     <label for="resultOutput" class="field-label" data-i18n="resultLabel">Generated code for README.md</label>
                     <textarea id="resultOutput" rows="12" readonly></textarea>
                 </div>
 
-                <div id="matchSummary" class="match-summary-container"></div>
+                <div id="matchSummary" class="match-summary-container" tabindex="0"></div>
             </section>
         </section>
     </main>

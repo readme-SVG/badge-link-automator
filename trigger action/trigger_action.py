@@ -24,6 +24,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
+from urllib.parse import quote
 
 import requests
 from github import Auth, Github
@@ -148,15 +149,18 @@ def load_config() -> Config:
 def collect_diff(files: list, limit: int) -> tuple[str, list[str]]:
     """Accumulate patch text for the changed files up to ``limit`` characters."""
     changed_files: list[str] = []
-    diff_text = ""
+    parts: list[str] = []
+    remaining = limit
     for file in files:
         changed_files.append(file.filename)
-        # ``patch`` is None for binary files; coerce to an empty string.
-        diff_text += f"File: {file.filename}\nPatch:\n{file.patch or ''}\n\n"
-        if len(diff_text) > limit:
-            diff_text += TRUNCATION_MARKER
+        chunk = f"File: {file.filename}\nPatch:\n{file.patch or ''}\n\n"
+        if len(chunk) > remaining:
+            parts.append(chunk[:remaining])
+            parts.append(TRUNCATION_MARKER)
             break
-    return diff_text, changed_files
+        parts.append(chunk)
+        remaining -= len(chunk)
+    return "".join(parts), changed_files
 
 
 def collect_push_event(repo: Repository, cfg: Config) -> EventContext:
@@ -557,7 +561,10 @@ def call_model(session: requests.Session, model_token: str, prompt: str,
                                 timeout=MODEL_TIMEOUT_SECONDS)
             resp.raise_for_status()
             raw = resp.json()["choices"][0]["message"]["content"]
-            return parse_model_response(raw)
+            result = parse_model_response(raw)
+            if not isinstance(result, dict):
+                raise ValueError("Model response must be a JSON object")
+            return result
         except requests.RequestException as exc:
             # Never log the exception body — it must not contain credentials.
             status = exc.response.status_code if exc.response is not None else "no response"
@@ -579,16 +586,19 @@ def call_model(session: requests.Session, model_token: str, prompt: str,
 def build_permalink(cfg: Config, event: EventContext,
                     filename: str, line: int = 1) -> str:
     """Build a GitHub blob permalink for a file and line number."""
-    sha = cfg.commit_sha or (event.pr_ref.head.sha if event.pr_ref else "")
-    return f"https://github.com/{cfg.repo_name}/blob/{sha}/{filename}#L{line}"
+    sha = event.pr_ref.head.sha if event.pr_ref else (cfg.commit_sha or "")
+    return f"https://github.com/{cfg.repo_name}/blob/{sha}/{quote(filename, safe='/')}#L{line}"
 
 
 def resolve_issue_body(result: dict, cfg: Config, event: EventContext) -> str:
     """Substitute the permalink placeholder in the model-generated body."""
-    body = result.get("issue_body", "")
-    affected_file = result.get("affected_file", "")
-    if affected_file:
+    body = result.get("issue_body")
+    body = body if isinstance(body, str) else ""
+    affected_file = result.get("affected_file")
+    if isinstance(affected_file, str) and affected_file in event.changed_files:
         affected_line = result.get("affected_line", 1)
+        if not isinstance(affected_line, int) or isinstance(affected_line, bool) or affected_line < 1:
+            affected_line = 1
         permalink = build_permalink(cfg, event, affected_file, affected_line)
         return body.replace(PERMALINK_PLACEHOLDER, permalink)
     return body.replace(PERMALINK_PLACEHOLDER, "_No specific file identified_")
@@ -600,13 +610,15 @@ def merge_labels(result: dict, severity: str) -> list[str]:
     if not isinstance(model_labels, list):
         model_labels = []
     severity_label = SEVERITY_LABELS.get(severity, SEVERITY_LABELS[DEFAULT_SEVERITY])
-    return list(dict.fromkeys([*model_labels, severity_label]))
+    return list(dict.fromkeys([*(label for label in model_labels if isinstance(label, str)), severity_label]))
 
 
 def publish_results(repo: Repository, cfg: Config, event: EventContext,
                     role_key: str, result: dict) -> None:
     """Create the GitHub issue and, for PR events, post the summary comment."""
-    title_keyword = result.get("issue_title", "")[:40]
+    title = result.get("issue_title")
+    title = title if isinstance(title, str) and title.strip() else "Automated change analysis"
+    title_keyword = title[:40]
     if title_keyword and was_already_closed(repo, title_keyword):
         raise SystemExit(0)
 
@@ -618,7 +630,7 @@ def publish_results(repo: Repository, cfg: Config, event: EventContext,
     )
 
     issue = repo.create_issue(
-        title=result.get("issue_title") or "Automated change analysis",
+        title=title,
         body=issue_body + footer,
         labels=merge_labels(result, severity),
     )
@@ -626,7 +638,7 @@ def publish_results(repo: Repository, cfg: Config, event: EventContext,
 
     if event.pr_ref:
         summary = result.get("summary", "")
-        if summary:
+        if isinstance(summary, str) and summary:
             pr_comment = (
                 f"### AI Analysis Summary\n\n"
                 f"{summary}\n\n"

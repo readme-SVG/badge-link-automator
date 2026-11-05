@@ -27,11 +27,12 @@ Convert raw Shields-style `<img>` badge tags into repository-linked snippets in 
 
 ## Features
 
-- Parses pasted HTML badge snippets and extracts `<img>` tags automatically.
+- Parses pasted HTML badge snippets and extracts HTTPS `<img>` tags automatically, retaining a safe subset of image attributes.
 - Converts each badge image into clickable anchor markup suitable for `README.md` profiles.
 - Uses GitHub repository metadata to rank and auto-match badges to the most relevant repository.
 - Supports heuristic technology alias matching (for example, `js` → `javascript`, `next` → `nextjs`, `gh-pages` → `githubpages`).
 - Falls back gracefully to the most recently active repository if no direct technology match is found.
+- Loads up to 500 recently updated repositories per account and warns when more are available.
 - Caches GitHub repository API responses in `localStorage` with TTL-based invalidation (15 minutes).
 - Persists form state locally so user input survives refreshes.
 - Includes multilingual UI support with strict translation-key validation at load time.
@@ -52,7 +53,7 @@ Convert raw Shields-style `<img>` badge tags into repository-linked snippets in 
 - **Styling:** Plain CSS3
 - **Internationalization:** Dictionary-based locale modules
 - **External Runtime Dependency:** GitHub REST API (`/users/{username}/repos`)
-- **CI Security/Linting:** GitHub Actions (Super-Linter + CodeQL)
+- **CI Security/Testing:** GitHub Actions (automated tests + CodeQL)
 
 ### Project Structure
 
@@ -82,7 +83,7 @@ badge-link-automator/
 - **Browser-first architecture:** keeps operations local and minimizes operational overhead.
 - **Heuristic matching over static mapping:** improves flexibility across varied badge label formats.
 - **TTL caching in browser storage:** reduces API calls and improves responsiveness during iterative edits.
-- **Translation key validation on startup:** fails fast when locale dictionaries drift.
+- **Translation key validation on startup:** reports missing keys and falls back to English.
 - **Progressive status feedback:** improves usability for non-technical contributors editing profile READMEs.
 
 ```mermaid
@@ -122,22 +123,24 @@ python3 -m http.server 8080
 # Open http://localhost:8080
 ```
 
-Alternative quick start:
-
-```bash
-# Open index.html directly in your browser
-# (static hosting recommended for consistent module loading behavior)
-```
+Serve the project over HTTP rather than opening `index.html` directly, since browsers restrict module loading from local files.
 
 ## Testing
 
-This repository currently does not ship a dedicated unit/integration test harness. Validation is primarily static-analysis and manual functional checks.
+Automated tests cover URL validation, badge sanitization, matching, pagination, the browser workflow, and the AI issue helper. With Node.js 20+ and Python 3.11+:
+
+```bash
+npm ci
+npm test
+python -m pip install PyGithub==2.5.0 requests==2.32.3
+python -m unittest discover -s tests -p "test_*.py"
+```
 
 ### Lint and Static Analysis
 
 ```bash
-# Run equivalent checks locally if available in your environment
-npx super-linter
+find assets tests -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+python -m py_compile "trigger action/trigger_action.py"
 ```
 
 ### Manual Functional Validation
@@ -175,7 +178,7 @@ Because the app is static-only, deploy it to any static hosting provider:
 
 The repository includes:
 
-- Super-Linter workflow for code quality and format policy checks.
+- Test and syntax-check workflow for JavaScript and Python.
 - CodeQL workflow for security/code scanning.
 - Dependabot + auto-merge workflow for safe dependency and action updates.
 

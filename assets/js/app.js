@@ -149,10 +149,12 @@ function classifyBadge(techName) {
         }
     }
 
+    if (!normalized) return { category: 'other', key: '', aliases: [] };
+
     for (const [category, data] of Object.entries(BADGE_CATEGORIES)) {
         for (const [key, aliases] of Object.entries(data.entries)) {
-            if (key.includes(normalized) || normalized.includes(key) ||
-                aliases.some((a) => a.includes(normalized) || normalized.includes(a))) {
+            if (normalized.length >= 3 && ((key.length >= 3 && (key.includes(normalized) || normalized.includes(key))) ||
+                aliases.some((a) => a.length >= 3 && (a.includes(normalized) || normalized.includes(a))))) {
                 return { category, key, aliases: [key, ...aliases] };
             }
         }
@@ -217,11 +219,13 @@ function extractTechName(imgTag) {
     const badgeFallback = imgTag.match(/badge\/([a-z0-9_%+.\-]+)-/i);
     const labelMatch = imgTag.match(/label=([a-z0-9_%+.\-]+)/i);
 
-    if (logoMatch) return decodeURIComponent(logoMatch[1]).toLowerCase().replace(/\s+/g, '');
-    if (badgeMatch) return decodeURIComponent(badgeMatch[1]).toLowerCase();
-    if (badgeFallback) return decodeURIComponent(badgeFallback[1]).toLowerCase();
-    if (labelMatch) return decodeURIComponent(labelMatch[1]).toLowerCase();
-    return '';
+    const value = logoMatch?.[1] || badgeMatch?.[1] || badgeFallback?.[1] || labelMatch?.[1] || '';
+    try {
+        const decoded = decodeURIComponent(value).toLowerCase();
+        return logoMatch ? decoded.replace(/\s+/g, '') : decoded;
+    } catch {
+        return value.toLowerCase();
+    }
 }
 
 function getSearchTerms(classification) {
@@ -263,7 +267,12 @@ function rankRepo(repo, searchTerms, classification) {
 
     if (profile.homepageDomain > 0 && homepage) {
         const domains = getHostingDomains(classification);
-        if (domains.some((d) => homepage.includes(d))) score += profile.homepageDomain;
+        try {
+            const host = new URL(homepage.includes('://') ? homepage : `https://${homepage}`).hostname;
+            if (domains.some((domain) => host === domain || host.endsWith(`.${domain}`))) score += profile.homepageDomain;
+        } catch {
+            // Invalid homepage metadata does not contribute a domain match.
+        }
     }
 
     searchTerms.forEach((term) => {
@@ -276,6 +285,7 @@ function rankRepo(repo, searchTerms, classification) {
         if (wordBoundaryMatch(htmlUrl, term)) score += profile.htmlUrl;
     });
 
+    if (score === 0) return 0;
     if (repo.homepage) score += BONUS.hasHomepage;
     if (!repo.fork) score += BONUS.notFork;
     if (repo.stargazers_count) {
@@ -284,7 +294,7 @@ function rankRepo(repo, searchTerms, classification) {
     const activityBonus = repo.pushed_at
         ? Math.max(0, BONUS.activityDays - (Date.now() - new Date(repo.pushed_at).getTime()) / 86400000)
         : 0;
-    score += activityBonus;
+    if (Number.isFinite(activityBonus)) score += activityBonus;
 
     return score;
 }
@@ -352,7 +362,7 @@ function assignReposWithDedup(repos, imgTags, fallbackUrl) {
         imgTag,
         repoUrl: sanitizeRepoUrl((repo && repo.html_url) || fallbackUrl),
         repoName: repo ? repo.full_name : null,
-        score: ranked.length > 0 ? ranked[0].score : 0,
+        score: ranked.find((entry) => entry.repo === repo)?.score || 0,
         techName: extractTechName(imgTag),
         category: ranked.length > 0 ? ranked[0].classification.category : 'other'
     }));
@@ -387,14 +397,38 @@ function formatHtmlOutput(assignments) {
 
 function formatMarkdownOutput(assignments) {
     return assignments.map(({ imgTag, repoUrl }) => {
-        const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
-        if (!srcMatch) return '';
-        const altMatch = imgTag.match(/alt=["']([^"']+)["']/i);
-        const alt = altMatch ? altMatch[1] : 'badge';
-        return `[![${alt}](${srcMatch[1]})](${repoUrl})`;
+        const template = document.createElement('template');
+        template.innerHTML = imgTag;
+        const image = template.content.querySelector('img');
+        if (!image) return '';
+        const src = image.getAttribute('src').replace(/%/g, '%25').replace(/%25([0-9a-f]{2})/gi, '%$1')
+            .replace(/\(/g, '%28').replace(/\)/g, '%29').replace(/\s/g, '%20')
+            .replace(/</g, '%3C').replace(/>/g, '%3E').replace(/\\/g, '%5C');
+        const alt = (image.getAttribute('alt') || 'badge').replace(/([\\\[\]])/g, '\\$1').replace(/[\r\n]/g, ' ');
+        return `[![${alt}](${src})](${repoUrl})`;
     }).filter(Boolean).join('\n');
 }
 
+function parseBadgeImages(markup) {
+    const template = document.createElement('template');
+    template.innerHTML = markup;
+    const sourceImages = Array.from(template.content.querySelectorAll('img'));
+    const images = sourceImages.flatMap((image) => {
+        const src = image.getAttribute('src');
+        try {
+            const url = new URL(src);
+            if (url.protocol !== 'https:' || url.username || url.password) return [];
+        } catch {
+            return [];
+        }
+        const safe = document.createElement('img');
+        for (const name of ['src', 'alt', 'title', 'width', 'height', 'align']) {
+            if (image.hasAttribute(name)) safe.setAttribute(name, image.getAttribute(name));
+        }
+        return [safe.outerHTML];
+    });
+    return { images, rejected: sourceImages.length - images.length };
+}
 
 // ─── Dynamic Organization URL Rows ───────────────────────────────────
 
@@ -412,6 +446,7 @@ function createOrgRow(value) {
     input.id = id;
     input.className = 'org-url-input';
     input.placeholder = t('orgPlaceholder');
+    input.setAttribute('aria-label', t('orgLabel'));
     input.value = value || '';
     input.addEventListener('input', debouncedSaveFormCache);
 
@@ -420,6 +455,7 @@ function createOrgRow(value) {
     removeBtn.className = 'org-remove-btn';
     removeBtn.textContent = '−';
     removeBtn.title = t('orgRemoveTitle');
+    removeBtn.setAttribute('aria-label', t('orgRemoveTitle'));
     removeBtn.addEventListener('click', () => {
         row.remove();
         saveFormCache();
@@ -457,8 +493,10 @@ function restoreOrgRows(urls) {
 
 // ─── Locale / Cache / UI ────────────────────────────────────────────
 
+let currentLanguage = readStorage(STORAGE_KEYS.language) || DEFAULT_LOCALE;
+
 function getCurrentLanguage() {
-    const saved = localStorage.getItem(STORAGE_KEYS.language);
+    const saved = currentLanguage;
     if (saved && isSupportedLocale(saved)) return saved;
     return DEFAULT_LOCALE;
 }
@@ -489,21 +527,42 @@ function applyLanguage() {
     document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
         el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
     });
-    // Update dynamic org placeholders
+    document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+        const value = t(el.dataset.i18nTitle);
+        el.title = value;
+        el.setAttribute('aria-label', value);
+    });
+    document.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+        el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel));
+    });
+    document.querySelectorAll('.org-remove-btn').forEach((el) => {
+        el.title = t('orgRemoveTitle');
+        el.setAttribute('aria-label', el.title);
+    });
+    // Update dynamic organization labels and placeholders.
     document.querySelectorAll('.org-url-input').forEach((el) => {
         el.placeholder = t('orgPlaceholder');
+        el.setAttribute('aria-label', t('orgLabel'));
     });
     const sel = document.getElementById('languageSelect');
     if (sel) sel.value = lang;
 }
 
+function readStorage(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+}
+
+function writeStorage(key, value) {
+    try { localStorage.setItem(key, value); } catch { /* Storage is optional. */ }
+}
+
 function readJsonStorage(key) {
-    const raw = localStorage.getItem(key);
+    const raw = readStorage(key);
     if (!raw) return null;
     try {
         return JSON.parse(raw);
     } catch (_e) {
-        localStorage.removeItem(key);
+        try { localStorage.removeItem(key); } catch { /* Storage is optional. */ }
         return null;
     }
 }
@@ -514,7 +573,7 @@ function loadFormCache() {
     if (typeof data.githubUrl === 'string') document.getElementById('githubUrl').value = data.githubUrl;
     if (typeof data.badgesInput === 'string') document.getElementById('badgesInput').value = data.badgesInput;
     if (typeof data.resultOutput === 'string') document.getElementById('resultOutput').value = data.resultOutput;
-    if (typeof data.outputFormat === 'string') {
+    if (['html', 'markdown'].includes(data.outputFormat)) {
         const radio = document.querySelector(`input[name="outputFormat"][value="${data.outputFormat}"]`);
         if (radio) radio.checked = true;
     }
@@ -532,7 +591,7 @@ function saveFormCache() {
         outputFormat: formatRadio ? formatRadio.value : 'html',
         orgUrls: getOrgUrls()
     };
-    localStorage.setItem(STORAGE_KEYS.form, JSON.stringify(payload));
+    writeStorage(STORAGE_KEYS.form, JSON.stringify(payload));
 }
 
 /** Debounced variant so rapid typing does not hammer localStorage. */
@@ -547,20 +606,20 @@ const debouncedSaveFormCache = debounce(saveFormCache, FORM_CACHE_DEBOUNCE_MS);
 
 function getRepoCache(username) {
     const cache = readJsonStorage(STORAGE_KEYS.repos);
-    if (!cache || !cache[username]) return null;
+    if (!cache || !Object.hasOwn(cache, username)) return null;
     const entry = cache[username];
-    if (Date.now() - entry.timestamp > REPO_CACHE_TTL_MS) {
+    if (!entry || !Array.isArray(entry.repos) || !Number.isFinite(entry.timestamp) || Date.now() - entry.timestamp > REPO_CACHE_TTL_MS || entry.timestamp > Date.now()) {
         delete cache[username];
-        localStorage.setItem(STORAGE_KEYS.repos, JSON.stringify(cache));
+        writeStorage(STORAGE_KEYS.repos, JSON.stringify(cache));
         return null;
     }
-    return entry.repos;
+    return entry;
 }
 
-function setRepoCache(username, repos) {
+function setRepoCache(username, repos, truncated) {
     const cache = readJsonStorage(STORAGE_KEYS.repos) || {};
-    cache[username] = { timestamp: Date.now(), repos };
-    localStorage.setItem(STORAGE_KEYS.repos, JSON.stringify(cache));
+    cache[username] = { timestamp: Date.now(), repos, truncated };
+    writeStorage(STORAGE_KEYS.repos, JSON.stringify(cache));
 }
 
 
@@ -582,7 +641,9 @@ async function fetchRepoPage(url, { onFirstPageNotFound } = {}) {
     let page = 0;
 
     while (nextUrl && page < MAX_REPO_PAGES) {
-        const resp = await fetch(nextUrl);
+        const next = new URL(nextUrl);
+        if (next.origin !== GITHUB_API_BASE) throw new Error('Invalid GitHub pagination URL');
+        const resp = await fetch(next.href);
         if (!resp.ok) {
             if (resp.status === 404 && page === 0 && onFirstPageNotFound) {
                 return onFirstPageNotFound();
@@ -590,12 +651,18 @@ async function fetchRepoPage(url, { onFirstPageNotFound } = {}) {
             throw new Error(t('errorApi', { status: resp.status, statusText: resp.statusText }));
         }
         const repos = await resp.json();
-        allRepos = allRepos.concat(repos);
+        if (!Array.isArray(repos)) throw new Error('Invalid GitHub API response');
+        allRepos.push(...repos.filter((repo) => repo && typeof repo === 'object').map((repo) => ({
+            id: repo.id, name: repo.name, full_name: repo.full_name, html_url: repo.html_url,
+            language: repo.language, description: repo.description, topics: repo.topics,
+            homepage: repo.homepage, fork: repo.fork, stargazers_count: repo.stargazers_count,
+            pushed_at: repo.pushed_at
+        })));
         nextUrl = parseLinkHeader(resp.headers.get('Link')).next || null;
         page++;
     }
 
-    return allRepos;
+    return { repos: allRepos, truncated: Boolean(nextUrl) };
 }
 
 async function fetchReposForAccount(account) {
@@ -604,13 +671,13 @@ async function fetchReposForAccount(account) {
 
     // Account names come from user input; encode before placing in the URL.
     const encoded = encodeURIComponent(account);
-    const repos = await fetchRepoPage(
+    const result = await fetchRepoPage(
         `${GITHUB_API_BASE}/users/${encoded}/repos?per_page=100&sort=updated`,
         { onFirstPageNotFound: () => fetchReposForOrg(account) }
     );
 
-    setRepoCache(account, repos);
-    return repos;
+    setRepoCache(account, result.repos, result.truncated);
+    return result;
 }
 
 async function fetchReposForOrg(orgName) {
@@ -619,12 +686,12 @@ async function fetchReposForOrg(orgName) {
     if (cached) return cached;
 
     const encoded = encodeURIComponent(orgName);
-    const repos = await fetchRepoPage(
+    const result = await fetchRepoPage(
         `${GITHUB_API_BASE}/orgs/${encoded}/repos?per_page=100&sort=updated`
     );
 
-    setRepoCache(cacheKey, repos);
-    return repos;
+    setRepoCache(cacheKey, result.repos, result.truncated);
+    return result;
 }
 
 /**
@@ -633,11 +700,17 @@ async function fetchReposForOrg(orgName) {
  */
 function extractGitHubName(input) {
     const trimmed = input.trim();
-    const urlMatch = trimmed.match(/github\.com\/([^/\s]+)/i);
-    if (urlMatch) return urlMatch[1];
-    // If it's just a plain name with no slashes or spaces
-    if (/^[a-z0-9\-]+$/i.test(trimmed)) return trimmed;
-    return null;
+    const validName = /^(?!-)(?!.*--)[a-z0-9-]{1,39}(?<!-)$/i;
+    if (validName.test(trimmed)) return trimmed;
+    try {
+        const url = new URL(trimmed.startsWith('github.com/') ? `https://${trimmed}` : trimmed);
+        if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'github.com' ||
+            url.port || url.username || url.password || url.search || url.hash) return null;
+        const match = url.pathname.match(/^\/([^/]+)\/?$/);
+        return match && validName.test(match[1]) ? match[1] : null;
+    } catch {
+        return null;
+    }
 }
 
 /**
@@ -645,11 +718,15 @@ function extractGitHubName(input) {
  * Deduplicates by repo id. Returns merged pool.
  */
 async function fetchAllRepos(mainUsername, orgUrls, statusMsg) {
+    const failedAccounts = [];
+    const truncatedAccounts = [];
     const allAccounts = [{ name: mainUsername, isMain: true }];
 
+    const seenAccounts = new Set([mainUsername.toLowerCase()]);
     orgUrls.forEach((url) => {
         const name = extractGitHubName(url);
-        if (name && name.toLowerCase() !== mainUsername.toLowerCase()) {
+        if (name && !seenAccounts.has(name.toLowerCase())) {
+            seenAccounts.add(name.toLowerCase());
             allAccounts.push({ name, isMain: false });
         }
     });
@@ -660,7 +737,8 @@ async function fetchAllRepos(mainUsername, orgUrls, statusMsg) {
     for (const account of allAccounts) {
         statusMsg.textContent = t('statusFetching', { username: account.name });
         try {
-            const repos = await fetchReposForAccount(account.name);
+            const { repos, truncated } = await fetchReposForAccount(account.name);
+            if (truncated) truncatedAccounts.push(account.name);
             repos.forEach((repo) => {
                 if (!seenIds.has(repo.id)) {
                     seenIds.add(repo.id);
@@ -671,13 +749,14 @@ async function fetchAllRepos(mainUsername, orgUrls, statusMsg) {
             // If an org fails, warn but continue with other sources
             if (!account.isMain) {
                 console.warn(`Failed to fetch repos for ${account.name}: ${err.message}`);
+                failedAccounts.push(account.name);
             } else {
                 throw err;
             }
         }
     }
 
-    return mergedRepos;
+    return { repos: mergedRepos, failedAccounts, truncatedAccounts };
 }
 
 
@@ -732,6 +811,8 @@ function setStatus(statusMsg, key, variables = {}, isError = false) {
 }
 
 async function generateLinks() {
+    const generateButton = document.querySelector('[data-action="generate"]');
+    if (generateButton.disabled) return;
     const githubUrl = document.getElementById('githubUrl').value.trim();
     const badgesInput = document.getElementById('badgesInput').value.trim();
     const resultOutput = document.getElementById('resultOutput');
@@ -747,31 +828,50 @@ async function generateLinks() {
         return;
     }
 
+    const orgUrls = getOrgUrls();
+    if (orgUrls.some((url) => !extractGitHubName(url))) {
+        setStatus(statusMsg, 'errorInvalidOrg', {}, true);
+        return;
+    }
+    const { images, rejected } = parseBadgeImages(badgesInput);
+    if (!images.length) {
+        setStatus(statusMsg, 'errorNoImg', {}, true);
+        return;
+    }
+
+    const format = getOutputFormat();
+    generateButton.disabled = true;
     try {
-        const orgUrls = getOrgUrls();
-        const repos = await fetchAllRepos(mainName, orgUrls, statusMsg);
+        const { repos, failedAccounts, truncatedAccounts } = await fetchAllRepos(mainName, orgUrls, statusMsg);
 
-        if (repos.length === 0) throw new Error(t('errorNoRepos'));
-
-        const images = badgesInput.match(/<img[^>]+>/gi);
-        if (!images) {
-            setStatus(statusMsg, 'errorNoImg', {}, true);
+        if (githubUrl !== document.getElementById('githubUrl').value.trim() ||
+            badgesInput !== document.getElementById('badgesInput').value.trim() ||
+            format !== getOutputFormat() || JSON.stringify(orgUrls) !== JSON.stringify(getOrgUrls())) {
+            setStatus(statusMsg, 'statusChanged', {}, true);
             return;
+        }
+        if (repos.length === 0) {
+            const detail = failedAccounts.length ? ` ${t('statusPartial', { accounts: failedAccounts.join(', ') })}` : '';
+            throw new Error(t('errorNoRepos') + detail);
         }
 
         const fallbackUrl = getFallbackRepoUrl(repos);
         const assignments = assignReposWithDedup(repos, images, fallbackUrl);
 
-        const format = getOutputFormat();
         resultOutput.value = format === 'markdown'
             ? formatMarkdownOutput(assignments)
             : formatHtmlOutput(assignments);
 
         renderMatchSummary(assignments);
         setStatus(statusMsg, 'statusDone');
+        if (rejected) statusMsg.textContent += ' ' + t('statusRejected', { count: rejected });
+        if (failedAccounts.length) statusMsg.textContent += ' ' + t('statusPartial', { accounts: failedAccounts.join(', ') });
+        if (truncatedAccounts.length) statusMsg.textContent += ' ' + t('statusTruncated', { accounts: truncatedAccounts.join(', ') });
         saveFormCache();
     } catch (error) {
         setStatus(statusMsg, 'errorGeneric', { message: error.message }, true);
+    } finally {
+        generateButton.disabled = false;
     }
 }
 
@@ -809,7 +909,8 @@ function initializeApp() {
     applyLanguage();
 
     langSelect.addEventListener('change', (e) => {
-        localStorage.setItem(STORAGE_KEYS.language, e.target.value);
+        currentLanguage = e.target.value;
+        writeStorage(STORAGE_KEYS.language, currentLanguage);
         applyLanguage();
     });
 
@@ -825,4 +926,6 @@ function initializeApp() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', initializeApp);
+if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', initializeApp);
+
+export { extractGitHubName, extractTechName, classifyBadge, rankRepo, assignReposWithDedup, sanitizeRepoUrl, parseBadgeImages, formatMarkdownOutput, fetchRepoPage };
